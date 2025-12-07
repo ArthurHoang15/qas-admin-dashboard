@@ -23,7 +23,8 @@
   },
   "header": {
     "logout": "Logout",
-    "language": "Language"
+    "language": "Language",
+    "back": "Back"
   },
   "templates": {
     "title": "Email Templates Management",
@@ -59,7 +60,32 @@
     "createdAt": "Created At",
     "searchPlaceholder": "Search by name or email...",
     "noRegistrations": "No registrations found",
-    "actions": "Actions"
+    "actions": "Actions",
+    "detail": {
+      "basicInfo": "Basic Information",
+      "statusClassification": "Status & Classification",
+      "satInfo": "SAT Information",
+      "emailActivity": "Email Activity",
+      "timestamps": "Timestamps",
+      "birthYear": "Birth Year",
+      "facebook": "Facebook",
+      "priorityScore": "Priority Score",
+      "priorityLabel": "Priority Label",
+      "poolName": "Pool Name",
+      "course": "Course",
+      "satScore": "SAT Score",
+      "targetScore": "Target Score",
+      "testDate": "Test Date",
+      "satTestStatus": "SAT Test Status",
+      "discoverySource": "Discovery Source",
+      "submissionType": "Submission Type",
+      "lastEmailSentCode": "Last Email Sent Code",
+      "lastAction": "Last Action",
+      "nextEmailDate": "Next Email Date",
+      "updatedAt": "Updated At",
+      "yes": "Yes",
+      "no": "No"
+    }
   },
   "dashboard": {
     "title": "Dashboard",

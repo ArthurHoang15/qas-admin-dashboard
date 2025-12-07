@@ -23,7 +23,8 @@
   },
   "header": {
     "logout": "Đăng xuất",
-    "language": "Ngôn ngữ"
+    "language": "Ngôn ngữ",
+    "back": "Quay lại"
   },
   "templates": {
     "title": "Quản lý Mẫu Email",
@@ -59,7 +60,32 @@
     "createdAt": "Ngày tạo",
     "searchPlaceholder": "Tìm theo tên hoặc email...",
     "noRegistrations": "Không tìm thấy đăng ký nào",
-    "actions": "Hành động"
+    "actions": "Hành động",
+    "detail": {
+      "basicInfo": "Thông tin cơ bản",
+      "statusClassification": "Trạng thái & Phân loại",
+      "satInfo": "Thông tin SAT",
+      "emailActivity": "Hoạt động Email",
+      "timestamps": "Thời gian",
+      "birthYear": "Năm sinh",
+      "facebook": "Facebook",
+      "priorityScore": "Điểm ưu tiên",
+      "priorityLabel": "Nhãn ưu tiên",
+      "poolName": "Tên nhóm",
+      "course": "Khóa học",
+      "satScore": "Điểm SAT",
+      "targetScore": "Điểm mục tiêu",
+      "testDate": "Ngày thi",
+      "satTestStatus": "Trạng thái thi SAT",
+      "discoverySource": "Nguồn tiếp cận",
+      "submissionType": "Loại đăng ký",
+      "lastEmailSentCode": "Mã email gửi gần nhất",
+      "lastAction": "Hành động gần nhất",
+      "nextEmailDate": "Ngày gửi email tiếp theo",
+      "updatedAt": "Ngày cập nhật",
+      "yes": "Có",
+      "no": "Không"
+    }
   },
   "dashboard": {
     "title": "Tổng quan",

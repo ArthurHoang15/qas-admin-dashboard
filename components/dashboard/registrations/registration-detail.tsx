@@ -45,45 +45,45 @@ export function RegistrationDetail({ registration }: RegistrationDetailProps) {
   };
 
   return (
-    <div className="space-y-6 max-w-4xl">
+    <div className="space-y-6 max-w-4xl mx-auto">
       {/* Basic Info */}
       <Card className="p-6">
-        <h2 className="text-lg font-semibold mb-4">Basic Information</h2>
+        <h2 className="text-lg font-semibold mb-4">{t("detail.basicInfo")}</h2>
         <div>
           <DetailRow label="ID" value={registration.id} />
           <DetailRow label={t("name")} value={`${registration.first_name} ${registration.last_name}`} />
           <DetailRow label={t("email")} value={registration.email} />
           <DetailRow label={t("phone")} value={registration.phone} />
-          <DetailRow label="Birth Year" value={registration.birth_year} />
-          <DetailRow label="Facebook" value={registration.facebook_link} />
+          <DetailRow label={t("detail.birthYear")} value={registration.birth_year} />
+          <DetailRow label={t("detail.facebook")} value={registration.facebook_link} />
         </div>
       </Card>
 
       {/* Status & Classification */}
       <Card className="p-6">
-        <h2 className="text-lg font-semibold mb-4">Status & Classification</h2>
+        <h2 className="text-lg font-semibold mb-4">{t("detail.statusClassification")}</h2>
         <div>
           <DetailRow label={t("priority")}>
             <PriorityBadge priority={registration.priority_level} />
           </DetailRow>
-          <DetailRow label="Priority Score" value={registration.priority_score} />
-          <DetailRow label="Priority Label" value={registration.priority_label} />
+          <DetailRow label={t("detail.priorityScore")} value={registration.priority_score} />
+          <DetailRow label={t("detail.priorityLabel")} value={registration.priority_label} />
           <DetailRow label={t("pool")}>
             <PoolBadge pool={registration.engagement_pool} />
           </DetailRow>
-          <DetailRow label="Pool Name" value={registration.pool_name} />
+          <DetailRow label={t("detail.poolName")} value={registration.pool_name} />
           <DetailRow label={t("qualified")}>
             <StatusBadge
               value={registration.is_qualified}
-              trueLabel="Yes"
-              falseLabel="No"
+              trueLabel={t("detail.yes")}
+              falseLabel={t("detail.no")}
             />
           </DetailRow>
           <DetailRow label={t("completed")}>
             <StatusBadge
               value={registration.is_completed}
-              trueLabel="Yes"
-              falseLabel="No"
+              trueLabel={t("detail.yes")}
+              falseLabel={t("detail.no")}
             />
           </DetailRow>
         </div>
@@ -91,34 +91,34 @@ export function RegistrationDetail({ registration }: RegistrationDetailProps) {
 
       {/* SAT Information */}
       <Card className="p-6">
-        <h2 className="text-lg font-semibold mb-4">SAT Information</h2>
+        <h2 className="text-lg font-semibold mb-4">{t("detail.satInfo")}</h2>
         <div>
-          <DetailRow label="Course" value={registration.course} />
-          <DetailRow label="SAT Score" value={registration.sat_score} />
-          <DetailRow label="Target Score" value={registration.target_score} />
-          <DetailRow label="Test Date" value={registration.test_date} />
-          <DetailRow label="SAT Test Status" value={registration.sat_test_status} />
-          <DetailRow label="Discovery Source" value={registration.discovery_source} />
-          <DetailRow label="Submission Type" value={registration.submission_type} />
+          <DetailRow label={t("detail.course")} value={registration.course} />
+          <DetailRow label={t("detail.satScore")} value={registration.sat_score} />
+          <DetailRow label={t("detail.targetScore")} value={registration.target_score} />
+          <DetailRow label={t("detail.testDate")} value={registration.test_date} />
+          <DetailRow label={t("detail.satTestStatus")} value={registration.sat_test_status} />
+          <DetailRow label={t("detail.discoverySource")} value={registration.discovery_source} />
+          <DetailRow label={t("detail.submissionType")} value={registration.submission_type} />
         </div>
       </Card>
 
       {/* Email Activity */}
       <Card className="p-6">
-        <h2 className="text-lg font-semibold mb-4">Email Activity</h2>
+        <h2 className="text-lg font-semibold mb-4">{t("detail.emailActivity")}</h2>
         <div>
-          <DetailRow label="Last Email Sent Code" value={registration.last_email_sent_code} />
-          <DetailRow label="Last Action" value={registration.last_action} />
-          <DetailRow label="Next Email Date" value={formatDate(registration.next_email_date)} />
+          <DetailRow label={t("detail.lastEmailSentCode")} value={registration.last_email_sent_code} />
+          <DetailRow label={t("detail.lastAction")} value={registration.last_action} />
+          <DetailRow label={t("detail.nextEmailDate")} value={formatDate(registration.next_email_date)} />
         </div>
       </Card>
 
       {/* Timestamps */}
       <Card className="p-6">
-        <h2 className="text-lg font-semibold mb-4">Timestamps</h2>
+        <h2 className="text-lg font-semibold mb-4">{t("detail.timestamps")}</h2>
         <div>
           <DetailRow label={t("createdAt")} value={formatDate(registration.created_at)} />
-          <DetailRow label="Updated At" value={formatDate(registration.updated_at)} />
+          <DetailRow label={t("detail.updatedAt")} value={formatDate(registration.updated_at)} />
         </div>
       </Card>
     </div>

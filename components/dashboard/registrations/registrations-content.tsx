@@ -10,11 +10,10 @@ import { RegistrationFilters } from "./registration-filters";
 import { RegistrationsTable } from "./registrations-table";
 import { CSVExportButton } from "./csv-export-button";
 import { CSVImportModal } from "./csv-import-modal";
-import { getRegistrations, getFilterOptions } from "@/actions/registration-actions";
+import { getRegistrations } from "@/actions/registration-actions";
 import {
   Registration,
   RegistrationFilters as Filters,
-  FilterOptions,
   PaginatedResult,
 } from "@/lib/types";
 
@@ -31,10 +30,6 @@ export function RegistrationsContent() {
     totalPages: 0,
   });
   const [filters, setFilters] = useState<Filters>({});
-  const [filterOptions, setFilterOptions] = useState<FilterOptions>({
-    priority_levels: [],
-    engagement_pools: [],
-  });
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
@@ -53,19 +48,6 @@ export function RegistrationsContent() {
       setIsLoading(false);
     }
   }, [filters, currentPage]);
-
-  const fetchFilterOptions = useCallback(async () => {
-    try {
-      const options = await getFilterOptions();
-      setFilterOptions(options);
-    } catch (error) {
-      console.error("Failed to fetch filter options:", error);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchFilterOptions();
-  }, [fetchFilterOptions]);
 
   useEffect(() => {
     fetchRegistrations();
@@ -87,7 +69,6 @@ export function RegistrationsContent() {
 
   const handleImportSuccess = () => {
     fetchRegistrations();
-    fetchFilterOptions();
   };
 
   return (
@@ -115,7 +96,6 @@ export function RegistrationsContent() {
       {/* Filters */}
       <RegistrationFilters
         filters={filters}
-        filterOptions={filterOptions}
         onFiltersChange={handleFiltersChange}
         onClearFilters={handleClearFilters}
       />

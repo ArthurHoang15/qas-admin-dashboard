@@ -5,18 +5,29 @@ import { Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { RegistrationFilters as Filters, FilterOptions } from "@/lib/types";
+import { RegistrationFilters as Filters, EngagementPool } from "@/lib/types";
+
+// Static options for all priorities and pools
+const ALL_PRIORITIES = [1, 2, 3, 4, 5];
+const ALL_POOLS: EngagementPool[] = ["sales", "consulting", "experience", "nurture", "education", "giveaway"];
+
+const POOL_LABELS: Record<EngagementPool, string> = {
+  sales: "Sales",
+  consulting: "Consulting",
+  experience: "Experience",
+  nurture: "Nurture",
+  education: "Education",
+  giveaway: "Giveaway",
+};
 
 interface RegistrationFiltersProps {
   filters: Filters;
-  filterOptions: FilterOptions;
   onFiltersChange: (filters: Filters) => void;
   onClearFilters: () => void;
 }
 
 export function RegistrationFilters({
   filters,
-  filterOptions,
   onFiltersChange,
   onClearFilters,
 }: RegistrationFiltersProps) {
@@ -24,7 +35,7 @@ export function RegistrationFilters({
 
   const priorityOptions = [
     { value: "", label: t("priority") + " - All" },
-    ...filterOptions.priority_levels.map((p) => ({
+    ...ALL_PRIORITIES.map((p) => ({
       value: String(p),
       label: `P${p}`,
     })),
@@ -32,22 +43,22 @@ export function RegistrationFilters({
 
   const poolOptions = [
     { value: "", label: t("pool") + " - All" },
-    ...filterOptions.engagement_pools.map((pool) => ({
+    ...ALL_POOLS.map((pool) => ({
       value: pool,
-      label: pool,
+      label: POOL_LABELS[pool],
     })),
   ];
 
   const qualifiedOptions = [
     { value: "", label: t("qualified") + " - All" },
-    { value: "true", label: "Yes" },
-    { value: "false", label: "No" },
+    { value: "true", label: t("detail.yes") },
+    { value: "false", label: t("detail.no") },
   ];
 
   const completedOptions = [
     { value: "", label: t("completed") + " - All" },
-    { value: "true", label: "Yes" },
-    { value: "false", label: "No" },
+    { value: "true", label: t("detail.yes") },
+    { value: "false", label: t("detail.no") },
   ];
 
   const hasActiveFilters =

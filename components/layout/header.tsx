@@ -20,12 +20,13 @@ export default function Header({ title, showBack }: HeaderProps) {
       <div className="flex items-center gap-3">
         {showBack && (
           <Button
-            variant="ghost"
+            variant="secondary"
             size="sm"
             onClick={() => router.back()}
-            className="h-8 w-8 p-0"
+            className="gap-2 px-3 border border-border hover:bg-muted"
           >
             <ArrowLeft className="h-4 w-4" />
+            <span className="hidden sm:inline">{t("back") || "Back"}</span>
           </Button>
         )}
         {title && (
