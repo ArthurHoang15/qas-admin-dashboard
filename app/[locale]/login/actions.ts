@@ -16,10 +16,10 @@ export async function login(formData: FormData) {
   });
 
   if (error) {
-    const errorMessage = encodeURIComponent("Sai email hoặc mật khẩu, vui lòng thử lại.");
+    const errorMessage = encodeURIComponent("Invalid email or password. Please try again.");
     return redirect(`/login?message=${errorMessage}`);
   }
 
   revalidatePath("/", "layout");
-  redirect("/");
+  redirect("/dashboard");
 }

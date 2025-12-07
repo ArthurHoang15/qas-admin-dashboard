@@ -1,0 +1,73 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "search": "Search",
+    "export": "Export",
+    "import": "Import",
+    "confirm": "Confirm",
+    "loading": "Loading...",
+    "noData": "No data available",
+    "actions": "Actions",
+    "back": "Back",
+    "view": "View",
+    "close": "Close"
+  },
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "templates": "Email Templates",
+    "registrations": "Registrations"
+  },
+  "header": {
+    "logout": "Logout",
+    "language": "Language"
+  },
+  "templates": {
+    "title": "Email Templates Management",
+    "createNew": "Create New Template",
+    "code": "Template Code",
+    "subject": "Subject",
+    "content": "HTML Content",
+    "description": "Description",
+    "preview": "Preview",
+    "deleteConfirm": "Are you sure you want to delete this template?",
+    "deleteSuccess": "Template deleted successfully",
+    "createSuccess": "Template created successfully",
+    "updateSuccess": "Template updated successfully",
+    "noTemplates": "No email templates yet",
+    "searchPlaceholder": "Search by code or subject...",
+    "variables": "Variables",
+    "variablesHint": "Use '{{email}}' and '{{name}}' for personalization"
+  },
+  "registrations": {
+    "title": "Registrations List",
+    "filters": "Filters",
+    "priority": "Priority",
+    "pool": "Pool",
+    "importCSV": "Import CSV",
+    "exportCSV": "Export CSV",
+    "totalRecords": "Total Records",
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "status": "Status",
+    "qualified": "Qualified",
+    "completed": "Completed",
+    "createdAt": "Created At"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "totalRegistrations": "Total Registrations",
+    "qualified": "Qualified",
+    "completed": "Completed",
+    "thisMonth": "This Month",
+    "trends": "Registration Trends",
+    "priorityBreakdown": "Priority Breakdown",
+    "poolBreakdown": "Pool Breakdown",
+    "recentActivity": "Recent Activity",
+    "fromLastMonth": "from last month"
+  }
+}

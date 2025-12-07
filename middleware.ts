@@ -1,39 +1,72 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { createMiddlewareClient } from "@/utils/supabase/middleware";
+import createIntlMiddleware from 'next-intl/middleware';
+import { routing, type Locale } from './i18n/routing';
+
+// Create the intl middleware
+const intlMiddleware = createIntlMiddleware(routing);
 
 export async function middleware(request: NextRequest) {
+  const pathname = request.nextUrl.pathname;
+
+  // Check if the request is for a locale-specific path
+  const pathnameHasLocale = routing.locales.some(
+    (locale: Locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
+  );
+
+  // Get the locale from the path or default
+  const locale = pathnameHasLocale
+    ? pathname.split('/')[1]
+    : routing.defaultLocale;
+
+  // Define paths that don't need auth (login pages for all locales)
+  const isLoginPath = pathname === '/login' ||
+    pathname === `/${locale}/login` ||
+    routing.locales.some((l: Locale) => pathname === `/${l}/login`);
+
+  // Run intl middleware first to handle locale routing
+  const intlResponse = intlMiddleware(request);
+
+  // Create Supabase client
   const { supabase, response } = await createMiddlewareClient(request);
 
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // --- LOGIC BẢO VỆ (GIỮ NGUYÊN) ---
-  
-  // Nếu user đang cố vào các trang dashboard (không phải trang login)
-  if (!request.nextUrl.pathname.startsWith("/login")) {
-    
-    // Chưa đăng nhập -> Đá về Login
+  // Auth protection logic
+  if (!isLoginPath) {
+    // Not logged in -> redirect to login
     if (!user) {
-      return NextResponse.redirect(new URL("/login", request.url));
+      const loginUrl = new URL(`/${locale}/login`, request.url);
+      return NextResponse.redirect(loginUrl);
     }
 
-    // Đã đăng nhập nhưng KHÔNG PHẢI ADMIN -> Đá ra ngoài
+    // Logged in but not admin -> sign out and redirect
     if (user.email !== process.env.ADMIN_EMAIL) {
       await supabase.auth.signOut();
-      return NextResponse.redirect(new URL("/login?message=Unauthorized Access", request.url));
+      const loginUrl = new URL(`/${locale}/login?message=Unauthorized Access`, request.url);
+      return NextResponse.redirect(loginUrl);
     }
   }
 
-  // Nếu đã login rồi mà cố vào lại trang Login -> Đá về Dashboard
-  if (request.nextUrl.pathname.startsWith("/login") && user) {
-     if (user.email === process.env.ADMIN_EMAIL) {
-        return NextResponse.redirect(new URL("/", request.url));
-     }
+  // If already logged in and trying to access login page -> redirect to dashboard
+  if (isLoginPath && user) {
+    if (user.email === process.env.ADMIN_EMAIL) {
+      const dashboardUrl = new URL(`/${locale}/dashboard`, request.url);
+      return NextResponse.redirect(dashboardUrl);
+    }
   }
 
-  // 3. Quan trọng: Trả về response đã được xử lý cookie
-  return response;
+  // Merge cookies from both responses
+  const finalResponse = intlResponse || response;
+
+  // Copy Supabase cookies to the final response
+  response.cookies.getAll().forEach((cookie: { name: string; value: string }) => {
+    finalResponse.cookies.set(cookie.name, cookie.value);
+  });
+
+  return finalResponse;
 }
 
 export const config = {

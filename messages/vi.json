@@ -1,0 +1,73 @@
+{
+  "common": {
+    "save": "Lưu",
+    "cancel": "Hủy",
+    "delete": "Xóa",
+    "edit": "Sửa",
+    "create": "Tạo mới",
+    "search": "Tìm kiếm",
+    "export": "Xuất",
+    "import": "Nhập",
+    "confirm": "Xác nhận",
+    "loading": "Đang tải...",
+    "noData": "Không có dữ liệu",
+    "actions": "Hành động",
+    "back": "Quay lại",
+    "view": "Xem",
+    "close": "Đóng"
+  },
+  "sidebar": {
+    "dashboard": "Tổng quan",
+    "templates": "Mẫu Email",
+    "registrations": "Đăng ký"
+  },
+  "header": {
+    "logout": "Đăng xuất",
+    "language": "Ngôn ngữ"
+  },
+  "templates": {
+    "title": "Quản lý Mẫu Email",
+    "createNew": "Tạo mẫu mới",
+    "code": "Mã mẫu",
+    "subject": "Tiêu đề",
+    "content": "Nội dung HTML",
+    "description": "Mô tả",
+    "preview": "Xem trước",
+    "deleteConfirm": "Bạn có chắc muốn xóa mẫu này?",
+    "deleteSuccess": "Đã xóa mẫu thành công",
+    "createSuccess": "Đã tạo mẫu thành công",
+    "updateSuccess": "Đã cập nhật mẫu thành công",
+    "noTemplates": "Chưa có mẫu email nào",
+    "searchPlaceholder": "Tìm kiếm theo mã hoặc tiêu đề...",
+    "variables": "Biến",
+    "variablesHint": "Sử dụng '{{email}}' và '{{name}}' để cá nhân hóa"
+  },
+  "registrations": {
+    "title": "Danh sách Đăng ký",
+    "filters": "Bộ lọc",
+    "priority": "Độ ưu tiên",
+    "pool": "Nhóm",
+    "importCSV": "Nhập từ CSV",
+    "exportCSV": "Xuất CSV",
+    "totalRecords": "Tổng số bản ghi",
+    "name": "Họ tên",
+    "email": "Email",
+    "phone": "Số điện thoại",
+    "status": "Trạng thái",
+    "qualified": "Đủ điều kiện",
+    "completed": "Hoàn thành",
+    "createdAt": "Ngày tạo"
+  },
+  "dashboard": {
+    "title": "Tổng quan",
+    "totalRegistrations": "Tổng đăng ký",
+    "qualified": "Đủ điều kiện",
+    "completed": "Hoàn thành",
+    "thisMonth": "Tháng này",
+    "trends": "Xu hướng đăng ký",
+    "priorityBreakdown": "Phân bổ ưu tiên",
+    "poolBreakdown": "Phân bổ nhóm",
+    "recentActivity": "Hoạt động gần đây",
+    "fromLastMonth": "so với tháng trước"
+  }
+}

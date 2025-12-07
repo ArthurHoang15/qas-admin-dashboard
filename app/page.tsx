@@ -7,9 +7,10 @@ export default async function RootPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
+  // Redirect to default locale (vi) with appropriate path
   if (user) {
-    redirect("/dashboard");
+    redirect("/vi/dashboard");
   } else {
-    redirect("/login");
+    redirect("/vi/login");
   }
 }
