@@ -56,7 +56,10 @@
     "status": "Trạng thái",
     "qualified": "Đủ điều kiện",
     "completed": "Hoàn thành",
-    "createdAt": "Ngày tạo"
+    "createdAt": "Ngày tạo",
+    "searchPlaceholder": "Tìm theo tên hoặc email...",
+    "noRegistrations": "Không tìm thấy đăng ký nào",
+    "actions": "Hành động"
   },
   "dashboard": {
     "title": "Tổng quan",

@@ -56,7 +56,10 @@
     "status": "Status",
     "qualified": "Qualified",
     "completed": "Completed",
-    "createdAt": "Created At"
+    "createdAt": "Created At",
+    "searchPlaceholder": "Search by name or email...",
+    "noRegistrations": "No registrations found",
+    "actions": "Actions"
   },
   "dashboard": {
     "title": "Dashboard",
