@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { createMiddlewareClient } from "@/utils/supabase/middleware";
+import { createMiddlewareClient } from "@/utils/supabase/middleware-client";
 import createIntlMiddleware from 'next-intl/middleware';
 import { routing, type Locale } from './i18n/routing';
 
