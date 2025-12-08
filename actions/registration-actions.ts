@@ -11,7 +11,13 @@ import {
   CSVRegistration,
   CSVValidationError,
   CSVImportResult,
+  EngagementPool,
 } from "@/lib/types";
+
+// Valid engagement pool values
+const VALID_ENGAGEMENT_POOLS: EngagementPool[] = [
+  'sales', 'consulting', 'experience', 'nurture', 'education', 'giveaway'
+];
 
 export async function getRegistrations(
   filters: RegistrationFilters,
@@ -76,10 +82,10 @@ export async function getRegistrations(
     );
     const total = parseInt(countResult.rows[0].count, 10);
 
-    // Get paginated data
+    // Get paginated data - use quoted identifiers for defense-in-depth
     const dataResult = await query(
       `SELECT * FROM qas_registrations ${whereClause}
-       ORDER BY ${safeSortBy} ${safeSortOrder}
+       ORDER BY "${safeSortBy}" ${safeSortOrder}
        LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`,
       [...params, limit, offset]
     );
@@ -242,6 +248,23 @@ export async function validateCSVData(
     if (row.sat_test_status && !["taken", "never"].includes(row.sat_test_status)) {
       errors.push({ row: rowNum, field: "sat_test_status", message: "SAT test status must be 'taken' or 'never'" });
     }
+
+    // Validate priority_level (1-5)
+    if (row.priority_level !== undefined && row.priority_level !== null) {
+      const priority = Number(row.priority_level);
+      if (isNaN(priority) || priority < 1 || priority > 5) {
+        errors.push({ row: rowNum, field: "priority_level", message: "Priority level must be between 1 and 5" });
+      }
+    }
+
+    // Validate engagement_pool
+    if (row.engagement_pool && !VALID_ENGAGEMENT_POOLS.includes(row.engagement_pool)) {
+      errors.push({
+        row: rowNum,
+        field: "engagement_pool",
+        message: `Engagement pool must be one of: ${VALID_ENGAGEMENT_POOLS.join(', ')}`
+      });
+    }
   });
 
   return errors;
@@ -291,7 +314,7 @@ export async function importRegistrations(
               row.email.trim().toLowerCase(),
               row.first_name.trim(),
               row.last_name.trim(),
-              row.phone?.trim() || "",
+              row.phone?.trim() || null,
               row.course || null,
               row.sat_score || null,
               row.birth_year || null,
@@ -313,7 +336,7 @@ export async function importRegistrations(
               row.first_name.trim(),
               row.last_name.trim(),
               row.email.trim().toLowerCase(),
-              row.phone?.trim() || "",
+              row.phone?.trim() || null,
               row.course || null,
               row.sat_score || null,
               row.birth_year || null,

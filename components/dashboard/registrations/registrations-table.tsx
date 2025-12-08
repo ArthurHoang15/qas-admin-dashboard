@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -12,15 +12,15 @@ import { Link } from "@/i18n/navigation";
 
 interface RegistrationsTableProps {
   registrations: Registration[];
-  onViewDetails?: (registration: Registration) => void;
 }
 
-export function RegistrationsTable({ registrations, onViewDetails }: RegistrationsTableProps) {
+export function RegistrationsTable({ registrations }: RegistrationsTableProps) {
   const t = useTranslations("registrations");
+  const locale = useLocale();
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return "-";
-    return new Date(dateString).toLocaleDateString("vi-VN", {
+    return new Date(dateString).toLocaleDateString(locale, {
       year: "numeric",
       month: "2-digit",
       day: "2-digit",
@@ -58,7 +58,7 @@ export function RegistrationsTable({ registrations, onViewDetails }: Registratio
                 {t("createdAt")}
               </th>
               <th className="px-4 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                {t("actions") || "Actions"}
+                {t("actions")}
               </th>
             </tr>
           </thead>
@@ -84,17 +84,30 @@ export function RegistrationsTable({ registrations, onViewDetails }: Registratio
                   <PoolBadge pool={registration.engagement_pool} />
                 </td>
                 <td className="px-4 py-3 text-sm whitespace-nowrap">
-                  <StatusBadge value={registration.is_qualified} />
+                  <StatusBadge
+                    value={registration.is_qualified}
+                    trueLabel={t("detail.yes")}
+                    falseLabel={t("detail.no")}
+                  />
                 </td>
                 <td className="px-4 py-3 text-sm whitespace-nowrap">
-                  <StatusBadge value={registration.is_completed} />
+                  <StatusBadge
+                    value={registration.is_completed}
+                    trueLabel={t("detail.yes")}
+                    falseLabel={t("detail.no")}
+                  />
                 </td>
                 <td className="px-4 py-3 text-sm text-muted-foreground whitespace-nowrap">
                   {formatDate(registration.created_at)}
                 </td>
                 <td className="px-4 py-3 text-sm text-right whitespace-nowrap">
                   <Link href={`/dashboard/registrations/${registration.id}`}>
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-8 p-0"
+                      aria-label={t("actions")}
+                    >
                       <Eye className="h-4 w-4" />
                     </Button>
                   </Link>

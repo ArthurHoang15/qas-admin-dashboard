@@ -2,13 +2,16 @@
 
 import { useState, useCallback } from "react";
 import { useTranslations } from "next-intl";
-import { Upload, AlertCircle, CheckCircle, X, FileSpreadsheet, Loader2 } from "lucide-react";
+import { Upload, AlertCircle, CheckCircle, FileSpreadsheet, Loader2 } from "lucide-react";
 import Papa from "papaparse";
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { CSVRegistration, CSVValidationError, CSVImportResult } from "@/lib/types";
+import { CSVRegistration, CSVValidationError, CSVImportResult, EngagementPool } from "@/lib/types";
 import { validateCSVData, importRegistrations } from "@/actions/registration-actions";
+
+// Max file size: 5MB
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
 interface CSVImportModalProps {
   isOpen: boolean;
@@ -30,6 +33,7 @@ export function CSVImportModal({ isOpen, onClose, onSuccess }: CSVImportModalPro
   const [isImporting, setIsImporting] = useState(false);
   const [importResult, setImportResult] = useState<CSVImportResult | null>(null);
   const [dragActive, setDragActive] = useState(false);
+  const [fileError, setFileError] = useState<string | null>(null);
 
   const resetState = useCallback(() => {
     setStep("upload");
@@ -39,6 +43,7 @@ export function CSVImportModal({ isOpen, onClose, onSuccess }: CSVImportModalPro
     setIsValidating(false);
     setIsImporting(false);
     setImportResult(null);
+    setFileError(null);
   }, []);
 
   const handleClose = () => {
@@ -58,10 +63,24 @@ export function CSVImportModal({ isOpen, onClose, onSuccess }: CSVImportModalPro
             last_name: row["last_name"] || row["Last Name"] || "",
             email: row["email"] || row["Email"] || "",
             phone: row["phone"] || row["Phone"] || undefined,
+            course: row["course"] || row["Course"] || undefined,
+            sat_score: row["sat_score"] || row["SAT Score"]
+              ? Number(row["sat_score"] || row["SAT Score"])
+              : undefined,
+            birth_year: row["birth_year"] || row["Birth Year"]
+              ? Number(row["birth_year"] || row["Birth Year"])
+              : undefined,
+            facebook_link: row["facebook_link"] || row["Facebook Link"] || undefined,
+            discovery_source: row["discovery_source"] || row["Discovery Source"] || undefined,
+            test_date: row["test_date"] || row["Test Date"] || undefined,
+            target_score: row["target_score"] || row["Target Score"]
+              ? Number(row["target_score"] || row["Target Score"])
+              : undefined,
+            sat_test_status: (row["sat_test_status"] || row["SAT Test Status"] || undefined) as CSVRegistration["sat_test_status"],
             priority_level: row["priority_level"] || row["Priority Level"]
               ? Number(row["priority_level"] || row["Priority Level"])
               : undefined,
-            engagement_pool: (row["engagement_pool"] || row["Engagement Pool"] || undefined) as CSVRegistration["engagement_pool"],
+            engagement_pool: (row["engagement_pool"] || row["Engagement Pool"] || undefined) as EngagementPool | undefined,
           }));
           resolve(mappedData);
         },
@@ -72,7 +91,15 @@ export function CSVImportModal({ isOpen, onClose, onSuccess }: CSVImportModalPro
     });
   };
 
-  const handleFileSelect = async (selectedFile: File) => {
+  const handleFileSelect = useCallback(async (selectedFile: File) => {
+    setFileError(null);
+
+    // Validate file size
+    if (selectedFile.size > MAX_FILE_SIZE) {
+      setFileError(`File size exceeds ${MAX_FILE_SIZE / 1024 / 1024}MB limit`);
+      return;
+    }
+
     setFile(selectedFile);
     setIsValidating(true);
 
@@ -86,13 +113,11 @@ export function CSVImportModal({ isOpen, onClose, onSuccess }: CSVImportModalPro
       setStep("preview");
     } catch (error) {
       console.error("Parse error:", error);
-      setValidationErrors([
-        { row: 0, field: "file", message: "Failed to parse CSV file" },
-      ]);
+      setFileError("Failed to parse CSV file. Please check the file format.");
     } finally {
       setIsValidating(false);
     }
-  };
+  }, []);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -103,9 +128,11 @@ export function CSVImportModal({ isOpen, onClose, onSuccess }: CSVImportModalPro
       const droppedFile = e.dataTransfer.files[0];
       if (droppedFile.type === "text/csv" || droppedFile.name.endsWith(".csv")) {
         handleFileSelect(droppedFile);
+      } else {
+        setFileError("Please upload a CSV file");
       }
     }
-  }, []);
+  }, [handleFileSelect]);
 
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -145,6 +172,8 @@ export function CSVImportModal({ isOpen, onClose, onSuccess }: CSVImportModalPro
         className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
           dragActive
             ? "border-primary bg-primary/5"
+            : fileError
+            ? "border-destructive"
             : "border-border hover:border-primary/50"
         }`}
         onDragEnter={handleDrag}
@@ -176,19 +205,28 @@ export function CSVImportModal({ isOpen, onClose, onSuccess }: CSVImportModalPro
               {isValidating ? "Processing..." : "Drop CSV file here or click to upload"}
             </p>
             <p className="text-xs text-muted-foreground mt-1">
-              Supports .csv files
+              Supports .csv files (max 5MB)
             </p>
           </div>
         </label>
       </div>
 
+      {fileError && (
+        <div className="flex items-center gap-2 text-destructive text-sm">
+          <AlertCircle className="h-4 w-4" />
+          {fileError}
+        </div>
+      )}
+
       <Card className="p-4">
         <h4 className="text-sm font-medium mb-2">Expected CSV format:</h4>
         <code className="text-xs text-muted-foreground block bg-muted p-2 rounded">
-          first_name, last_name, email, phone
+          first_name, last_name, email, phone, course, sat_score, birth_year,
+          facebook_link, discovery_source, test_date, target_score, sat_test_status,
+          priority_level, engagement_pool
         </code>
         <p className="text-xs text-muted-foreground mt-2">
-          * first_name, last_name, and email are required
+          * first_name, last_name, and email are required. Priority: 1-5. Pool: sales, consulting, experience, nurture, education, giveaway
         </p>
       </Card>
     </div>
@@ -244,13 +282,15 @@ export function CSVImportModal({ isOpen, onClose, onSuccess }: CSVImportModalPro
           </thead>
           <tbody className="divide-y divide-border">
             {parsedData.slice(0, 20).map((row, idx) => {
-              const hasError = validationErrors.some((e) => e.row === idx + 1);
+              // Row number matches validation (idx + 2 because row 1 is header)
+              const rowNum = idx + 2;
+              const hasError = validationErrors.some((e) => e.row === rowNum);
               return (
                 <tr
                   key={idx}
                   className={hasError ? "bg-destructive/10" : ""}
                 >
-                  <td className="px-3 py-2 text-muted-foreground">{idx + 1}</td>
+                  <td className="px-3 py-2 text-muted-foreground">{rowNum}</td>
                   <td className="px-3 py-2">
                     {row.first_name} {row.last_name}
                   </td>

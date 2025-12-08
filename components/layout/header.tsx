@@ -24,9 +24,10 @@ export default function Header({ title, showBack }: HeaderProps) {
             size="sm"
             onClick={() => router.back()}
             className="gap-2 px-3 border border-border hover:bg-muted"
+            aria-label={t("back")}
           >
             <ArrowLeft className="h-4 w-4" />
-            <span className="hidden sm:inline">{t("back") || "Back"}</span>
+            <span className="hidden sm:inline">{t("back")}</span>
           </Button>
         )}
         {title && (

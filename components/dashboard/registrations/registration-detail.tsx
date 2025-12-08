@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Card } from "@/components/ui/card";
 import { Registration } from "@/lib/types";
 import { PriorityBadge } from "./priority-badge";
@@ -32,10 +32,11 @@ interface RegistrationDetailProps {
 
 export function RegistrationDetail({ registration }: RegistrationDetailProps) {
   const t = useTranslations("registrations");
+  const locale = useLocale();
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return "-";
-    return new Date(dateString).toLocaleString("vi-VN", {
+    return new Date(dateString).toLocaleString(locale, {
       year: "numeric",
       month: "2-digit",
       day: "2-digit",
