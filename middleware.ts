@@ -27,6 +27,30 @@ export async function middleware(request: NextRequest) {
   // Run intl middleware first to handle locale routing
   const intlResponse = intlMiddleware(request);
 
+  // Check for required environment variables before creating Supabase client
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    return new NextResponse(
+      `<!DOCTYPE html>
+      <html>
+        <head><title>Configuration Error</title></head>
+        <body style="font-family: system-ui; padding: 40px; max-width: 600px; margin: 0 auto;">
+          <h1 style="color: #dc2626;">⚠️ Configuration Error</h1>
+          <p>Missing required environment variables:</p>
+          <ul>
+            <li><code>NEXT_PUBLIC_SUPABASE_URL</code></li>
+            <li><code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code></li>
+          </ul>
+          <p>Please configure these in your <strong>Vercel Project Settings → Environment Variables</strong>.</p>
+          <p>You can find these values in your <a href="https://supabase.com/dashboard/project/_/settings/api">Supabase Dashboard</a>.</p>
+        </body>
+      </html>`,
+      {
+        status: 500,
+        headers: { 'Content-Type': 'text/html' },
+      }
+    );
+  }
+
   // Create Supabase client
   const { supabase, response } = await createMiddlewareClient(request);
 
