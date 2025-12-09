@@ -6,7 +6,7 @@ import { routing, type Locale } from './i18n/routing';
 // Create the intl middleware
 const intlMiddleware = createIntlMiddleware(routing);
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
   // Check if the request is for a locale-specific path
