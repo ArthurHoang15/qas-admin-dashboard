@@ -1,12 +1,12 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { createMiddlewareClient } from "@/utils/supabase/middleware";
+import { createMiddlewareClient } from "@/utils/supabase/middleware-client";
 import createIntlMiddleware from 'next-intl/middleware';
 import { routing, type Locale } from './i18n/routing';
 
 // Create the intl middleware
 const intlMiddleware = createIntlMiddleware(routing);
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
   // Check if the request is for a locale-specific path
