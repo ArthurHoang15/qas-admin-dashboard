@@ -28,7 +28,7 @@ export interface RecentActivity {
   id: number;
   name: string;
   email: string;
-  action: string;
+  submissionType: 'completed' | 'partial';
   timestamp: string;
   type: 'registration' | 'qualified' | 'completed';
   lastAction?: string | null;

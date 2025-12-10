@@ -1,21 +1,23 @@
-import { UserPlus, UserCheck, CheckCircle } from "lucide-react";
+import { UserPlus, FileEdit } from "lucide-react";
 import type { RecentActivity } from "@/lib/types/dashboard";
 
 interface ActivityItemProps {
   activity: RecentActivity;
   locale: string;
+  translations: {
+    registered: string;
+    draft: string;
+  };
 }
 
 const typeIcons = {
-  registration: UserPlus,
-  qualified: UserCheck,
-  completed: CheckCircle,
+  completed: UserPlus,
+  partial: FileEdit,
 };
 
 const typeColors = {
-  registration: "text-blue-500 bg-blue-500/10",
-  qualified: "text-amber-500 bg-amber-500/10",
-  completed: "text-emerald-500 bg-emerald-500/10",
+  completed: "text-blue-500 bg-blue-500/10",
+  partial: "text-amber-500 bg-amber-500/10",
 };
 
 const actionColors: Record<string, string> = {
@@ -24,9 +26,10 @@ const actionColors: Record<string, string> = {
   "Clicked": "bg-emerald-500/10 text-emerald-500",
 };
 
-export function ActivityItem({ activity, locale }: ActivityItemProps) {
-  const Icon = typeIcons[activity.type];
-  const colorClass = typeColors[activity.type];
+export function ActivityItem({ activity, locale, translations }: ActivityItemProps) {
+  const Icon = typeIcons[activity.submissionType];
+  const colorClass = typeColors[activity.submissionType];
+  const actionLabel = activity.submissionType === "completed" ? translations.registered : translations.draft;
 
   const timeAgo = getTimeAgo(activity.timestamp, locale);
   const emailActionColor = actionColors[activity.lastAction || "None"] || "bg-gray-500/10 text-gray-500";
@@ -53,7 +56,7 @@ export function ActivityItem({ activity, locale }: ActivityItemProps) {
         </div>
       </div>
       <div className="text-right shrink-0">
-        <p className="text-xs font-medium text-foreground">{activity.action}</p>
+        <p className="text-xs font-medium text-foreground">{actionLabel}</p>
         <p className="text-[10px] text-muted-foreground">{timeAgo}</p>
       </div>
     </div>

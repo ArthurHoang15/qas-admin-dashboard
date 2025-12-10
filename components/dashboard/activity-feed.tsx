@@ -6,6 +6,10 @@ interface ActivityFeedProps {
   title: string;
   locale: string;
   emptyMessage?: string;
+  translations: {
+    registered: string;
+    draft: string;
+  };
 }
 
 export function ActivityFeed({
@@ -13,6 +17,7 @@ export function ActivityFeed({
   title,
   locale,
   emptyMessage = "No recent activity",
+  translations,
 }: ActivityFeedProps) {
   return (
     <div className="rounded-xl border border-border bg-card p-6 h-full">
@@ -28,6 +33,7 @@ export function ActivityFeed({
               key={activity.id}
               activity={activity}
               locale={locale}
+              translations={translations}
             />
           ))
         )}

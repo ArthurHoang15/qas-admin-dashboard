@@ -7,6 +7,7 @@ interface TrendAreaChartProps {
   data: TrendDataPoint[];
   title: string;
   registrationsLabel?: string;
+  locale?: string;
 }
 
 function CustomTooltip({ payload, active, label }: CustomTooltipProps) {
@@ -30,10 +31,11 @@ function CustomTooltip({ payload, active, label }: CustomTooltipProps) {
   );
 }
 
-export function TrendAreaChart({ data, title, registrationsLabel = "Registrations" }: TrendAreaChartProps) {
-  // Format dates for display and rename category for tooltip
+export function TrendAreaChart({ data, title, registrationsLabel = "Registrations", locale = "en" }: TrendAreaChartProps) {
+  // Format dates for display based on locale
+  const dateLocale = locale === "vi" ? "vi-VN" : "en-US";
   const formattedData = data.map((point) => ({
-    date: new Date(point.date).toLocaleDateString("en-US", {
+    date: new Date(point.date).toLocaleDateString(dateLocale, {
       month: "short",
       day: "numeric",
     }),

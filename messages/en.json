@@ -101,6 +101,8 @@
     "emailActions": "Email Actions",
     "fromLastMonth": "from last month",
     "noActivity": "No recent activity",
-    "noData": "No data available"
+    "noData": "No data available",
+    "registered": "Registered",
+    "draft": "Draft"
   }
 }

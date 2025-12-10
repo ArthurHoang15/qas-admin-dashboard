@@ -51,7 +51,7 @@ export default async function DashboardPage() {
         {/* Charts Row 1: Trend + Priority */}
         <div className="grid gap-6 lg:grid-cols-3">
           <div className="lg:col-span-2">
-            <TrendAreaChart data={trends} title={t("trends")} registrationsLabel={t("registrationsLabel")} />
+            <TrendAreaChart data={trends} title={t("trends")} registrationsLabel={t("registrationsLabel")} locale={locale} />
           </div>
           <div className="lg:col-span-1">
             <PriorityDonutChart data={priorityData} title={t("priorityBreakdown")} />
@@ -69,6 +69,10 @@ export default async function DashboardPage() {
               title={t("recentActivity")}
               locale={locale}
               emptyMessage={t("noActivity")}
+              translations={{
+                registered: t("registered"),
+                draft: t("draft"),
+              }}
             />
           </div>
           <div>

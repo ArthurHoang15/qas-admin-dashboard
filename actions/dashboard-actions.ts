@@ -150,6 +150,7 @@ export async function getRecentActivities(
       email,
       is_qualified,
       is_completed,
+      submission_type,
       created_at,
       updated_at,
       last_action,
@@ -169,28 +170,28 @@ export async function getRecentActivities(
       email: string;
       is_qualified: boolean;
       is_completed: boolean;
+      submission_type: string | null;
       created_at: string;
       updated_at: string;
       last_action: string | null;
       last_email_sent_code: string | null;
       next_email_date: string | null;
     }) => {
-      let action = "Registered";
       let type: "registration" | "qualified" | "completed" = "registration";
 
       if (row.is_completed) {
-        action = "Completed";
         type = "completed";
       } else if (row.is_qualified) {
-        action = "Qualified";
         type = "qualified";
       }
+
+      const submissionType = (row.submission_type === "partial" ? "partial" : "completed") as "completed" | "partial";
 
       return {
         id: row.id,
         name: `${row.first_name} ${row.last_name}`,
         email: row.email,
-        action,
+        submissionType,
         timestamp: row.updated_at,
         type,
         lastAction: row.last_action,
