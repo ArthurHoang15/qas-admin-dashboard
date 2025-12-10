@@ -78,3 +78,37 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--foreground);
 }
+
+/* Tremor chart overrides for better contrast */
+.tremor-Legend-legendItem {
+  color: var(--foreground) !important;
+}
+
+.tremor-Legend-legendDot {
+  width: 10px !important;
+  height: 10px !important;
+}
+
+/* Dark mode Tremor adjustments */
+@media (prefers-color-scheme: dark) {
+  .tremor-AreaChart-area {
+    opacity: 0.8;
+  }
+
+  .tremor-BarList-bar {
+    opacity: 0.9;
+  }
+
+  [class*="tremor"] text {
+    fill: var(--foreground) !important;
+  }
+
+  .recharts-cartesian-axis-tick-value {
+    fill: var(--muted-foreground) !important;
+  }
+
+  .recharts-tooltip-wrapper .recharts-default-tooltip {
+    background-color: var(--card) !important;
+    border-color: var(--border) !important;
+  }
+}

@@ -20,17 +20,21 @@ export function TrendAreaChart({ data, title }: TrendAreaChartProps) {
 
   return (
     <div className="rounded-xl border border-border bg-card p-6">
-      <h3 className="mb-4 text-sm font-medium text-muted-foreground">{title}</h3>
+      <h3 className="mb-4 text-sm font-medium text-foreground">{title}</h3>
       <AreaChart
-        className="h-72"
+        className="h-72 [&_.recharts-cartesian-axis-tick-value]:fill-foreground [&_.recharts-cartesian-grid-horizontal_line]:stroke-border [&_.recharts-cartesian-grid-vertical_line]:stroke-border"
         data={formattedData}
         index="date"
         categories={["registrations"]}
-        colors={["blue"]}
+        colors={["cyan"]}
         showLegend={false}
-        showGridLines={false}
+        showGridLines={true}
         curveType="monotone"
         yAxisWidth={40}
+        showXAxis={true}
+        showYAxis={true}
+        autoMinValue={true}
+        connectNulls={true}
       />
     </div>
   );

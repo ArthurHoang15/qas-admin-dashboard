@@ -28,8 +28,8 @@ export function StatsCard({
   return (
     <div className="rounded-xl border border-border bg-card p-6">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-medium text-muted-foreground">{title}</h3>
-        {icon && <div className="text-muted-foreground">{icon}</div>}
+        <h3 className="text-sm font-medium text-foreground/80">{title}</h3>
+        {icon && <div className="text-foreground/60">{icon}</div>}
       </div>
       <div className="mt-2 text-3xl font-bold text-foreground">
         {typeof value === "number" ? value.toLocaleString() : value}
