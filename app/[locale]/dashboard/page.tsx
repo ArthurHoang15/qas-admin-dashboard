@@ -48,7 +48,7 @@ export default async function DashboardPage() {
         {/* Charts Row 1: Trend + Priority */}
         <div className="grid gap-6 lg:grid-cols-3">
           <div className="lg:col-span-2">
-            <TrendAreaChart data={trends} title={t("trends")} />
+            <TrendAreaChart data={trends} title={t("trends")} registrationsLabel={t("registrationsLabel")} />
           </div>
           <div className="lg:col-span-1">
             <PriorityDonutChart data={priorityData} title={t("priorityBreakdown")} />

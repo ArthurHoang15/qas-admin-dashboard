@@ -1,31 +1,53 @@
 "use client";
 
-import { AreaChart } from "@tremor/react";
+import { AreaChart, type CustomTooltipProps } from "@tremor/react";
 import type { TrendDataPoint } from "@/lib/types/dashboard";
 
 interface TrendAreaChartProps {
   data: TrendDataPoint[];
   title: string;
+  registrationsLabel?: string;
 }
 
-export function TrendAreaChart({ data, title }: TrendAreaChartProps) {
-  // Format dates for display
+function CustomTooltip({ payload, active, label }: CustomTooltipProps) {
+  if (!active || !payload?.length) return null;
+
+  return (
+    <div className="rounded-md border border-border bg-card px-3 py-2 shadow-lg">
+      <p className="text-sm font-medium text-foreground mb-1">{label}</p>
+      {payload.map((item, index) => (
+        <div key={index} className="flex items-center gap-2 text-sm">
+          <span
+            className="h-2.5 w-2.5 rounded-full"
+            style={{ backgroundColor: item.color as string }}
+          />
+          <span className="text-foreground">
+            {item.dataKey}: <span className="font-semibold">{Number(item.value).toLocaleString()}</span>
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export function TrendAreaChart({ data, title, registrationsLabel = "Registrations" }: TrendAreaChartProps) {
+  // Format dates for display and rename category for tooltip
   const formattedData = data.map((point) => ({
-    ...point,
     date: new Date(point.date).toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
     }),
+    [registrationsLabel]: point.registrations,
   }));
 
   return (
-    <div className="rounded-xl border border-border bg-card p-6">
+    <div className="rounded-xl border border-border bg-card p-6 h-full">
       <h3 className="mb-4 text-sm font-medium text-foreground">{title}</h3>
       <AreaChart
         className="h-72 [&_.recharts-cartesian-axis-tick-value]:fill-foreground [&_.recharts-cartesian-grid-horizontal_line]:stroke-border [&_.recharts-cartesian-grid-vertical_line]:stroke-border"
         data={formattedData}
         index="date"
-        categories={["registrations"]}
+        categories={[registrationsLabel]}
         colors={["cyan"]}
         showLegend={false}
         showGridLines={true}
@@ -35,6 +57,7 @@ export function TrendAreaChart({ data, title }: TrendAreaChartProps) {
         showYAxis={true}
         autoMinValue={true}
         connectNulls={true}
+        customTooltip={CustomTooltip}
       />
     </div>
   );

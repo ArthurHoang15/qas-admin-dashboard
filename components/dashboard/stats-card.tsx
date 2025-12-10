@@ -16,10 +16,24 @@ export function StatsCard({
   icon,
 }: StatsCardProps) {
   const currentValue = typeof value === "number" ? value : 0;
-  const change =
-    previousValue !== undefined && previousValue > 0
-      ? ((currentValue - previousValue) / previousValue) * 100
-      : 0;
+
+  // Calculate percentage change
+  let change = 0;
+  let isNewData = false;
+
+  if (previousValue !== undefined) {
+    if (previousValue === 0 && currentValue > 0) {
+      // New data exists but no previous data - show as 100% increase
+      change = 100;
+      isNewData = true;
+    } else if (previousValue > 0) {
+      // Normal percentage calculation
+      change = ((currentValue - previousValue) / previousValue) * 100;
+    } else if (previousValue === 0 && currentValue === 0) {
+      // Both are zero
+      change = 0;
+    }
+  }
 
   const isPositive = change > 0;
   const isNegative = change < 0;
@@ -39,7 +53,9 @@ export function StatsCard({
           {isPositive && (
             <>
               <TrendingUp className="h-3 w-3 text-emerald-500" />
-              <span className="text-emerald-500">+{change.toFixed(1)}%</span>
+              <span className="text-emerald-500">
+                +{isNewData ? "100" : change.toFixed(1)}%
+              </span>
             </>
           )}
           {isNegative && (

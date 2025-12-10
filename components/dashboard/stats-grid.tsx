@@ -14,12 +14,15 @@ interface StatsGridProps {
 }
 
 export function StatsGrid({ stats, translations }: StatsGridProps) {
+  // Calculate previous month's total (total now minus this month's new registrations)
+  const previousMonthTotal = stats.totalRegistrations - stats.thisMonthCount;
+
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       <StatsCard
         title={translations.totalRegistrations}
         value={stats.totalRegistrations}
-        previousValue={stats.totalRegistrations - stats.thisMonthCount + stats.lastMonthCount}
+        previousValue={previousMonthTotal > 0 ? previousMonthTotal : stats.lastMonthCount}
         suffix={translations.fromLastMonth}
         icon={<Users className="h-4 w-4" />}
       />
