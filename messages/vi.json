@@ -97,6 +97,8 @@
     "priorityBreakdown": "Phân bổ ưu tiên",
     "poolBreakdown": "Phân bổ nhóm",
     "recentActivity": "Hoạt động gần đây",
-    "fromLastMonth": "so với tháng trước"
+    "fromLastMonth": "so với tháng trước",
+    "noActivity": "Không có hoạt động gần đây",
+    "noData": "Không có dữ liệu"
   }
 }

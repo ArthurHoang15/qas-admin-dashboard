@@ -97,6 +97,8 @@
     "priorityBreakdown": "Priority Breakdown",
     "poolBreakdown": "Pool Breakdown",
     "recentActivity": "Recent Activity",
-    "fromLastMonth": "from last month"
+    "fromLastMonth": "from last month",
+    "noActivity": "No recent activity",
+    "noData": "No data available"
   }
 }
