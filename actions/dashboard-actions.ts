@@ -7,6 +7,7 @@ import type {
   PriorityDistribution,
   PoolBreakdown,
   RecentActivity,
+  EmailActionStats,
 } from "@/lib/types/dashboard";
 
 const PRIORITY_COLORS: Record<number, string> = {
@@ -150,7 +151,10 @@ export async function getRecentActivities(
       is_qualified,
       is_completed,
       created_at,
-      updated_at
+      updated_at,
+      last_action,
+      last_email_sent_code,
+      next_email_date
     FROM qas_registrations
     ORDER BY updated_at DESC
     LIMIT $1`,
@@ -167,6 +171,9 @@ export async function getRecentActivities(
       is_completed: boolean;
       created_at: string;
       updated_at: string;
+      last_action: string | null;
+      last_email_sent_code: string | null;
+      next_email_date: string | null;
     }) => {
       let action = "Registered";
       let type: "registration" | "qualified" | "completed" = "registration";
@@ -186,7 +193,29 @@ export async function getRecentActivities(
         action,
         timestamp: row.updated_at,
         type,
+        lastAction: row.last_action,
+        lastEmailSentCode: row.last_email_sent_code,
+        nextEmailDate: row.next_email_date,
       };
     }
   );
+}
+
+export async function getEmailActionStats(): Promise<EmailActionStats[]> {
+  const result = await query(
+    `SELECT
+      COALESCE(last_action, 'None') as action,
+      COUNT(*) as count
+    FROM qas_registrations
+    GROUP BY last_action
+    ORDER BY count DESC`
+  );
+
+  const totalCount = result.rows.reduce((sum: number, row: { count: string }) => sum + Number(row.count), 0);
+
+  return result.rows.map((row: { action: string; count: string }) => ({
+    action: row.action || 'None',
+    count: Number(row.count),
+    percentage: totalCount > 0 ? Math.round((Number(row.count) / totalCount) * 100) : 0,
+  }));
 }

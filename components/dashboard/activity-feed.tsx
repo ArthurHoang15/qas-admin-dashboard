@@ -15,9 +15,9 @@ export function ActivityFeed({
   emptyMessage = "No recent activity",
 }: ActivityFeedProps) {
   return (
-    <div className="rounded-xl border border-border bg-card p-6">
-      <h3 className="mb-4 text-sm font-medium text-muted-foreground">{title}</h3>
-      <div className="divide-y divide-border">
+    <div className="rounded-xl border border-border bg-card p-6 h-full">
+      <h3 className="mb-4 text-sm font-medium text-foreground">{title}</h3>
+      <div className="divide-y divide-border max-h-[280px] overflow-y-auto">
         {activities.length === 0 ? (
           <p className="py-4 text-center text-sm text-muted-foreground italic">
             {emptyMessage}

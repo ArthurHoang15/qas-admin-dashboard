@@ -31,4 +31,13 @@ export interface RecentActivity {
   action: string;
   timestamp: string;
   type: 'registration' | 'qualified' | 'completed';
+  lastAction?: string | null;
+  lastEmailSentCode?: string | null;
+  nextEmailDate?: string | null;
+}
+
+export interface EmailActionStats {
+  action: string;
+  count: number;
+  percentage: number;
 }

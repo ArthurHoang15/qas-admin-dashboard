@@ -4,6 +4,7 @@ import { StatsGrid } from "@/components/dashboard/stats-grid";
 import { TrendAreaChart } from "@/components/dashboard/charts/trend-area-chart";
 import { PriorityDonutChart } from "@/components/dashboard/charts/priority-donut-chart";
 import { PoolBarChart } from "@/components/dashboard/charts/pool-bar-chart";
+import { EmailActionChart } from "@/components/dashboard/charts/email-action-chart";
 import { ActivityFeed } from "@/components/dashboard/activity-feed";
 import {
   getDashboardStats,
@@ -11,6 +12,7 @@ import {
   getPriorityDistribution,
   getPoolBreakdown,
   getRecentActivities,
+  getEmailActionStats,
 } from "@/actions/dashboard-actions";
 
 export default async function DashboardPage() {
@@ -18,13 +20,14 @@ export default async function DashboardPage() {
   const locale = await getLocale();
 
   // Fetch all dashboard data in parallel
-  const [stats, trends, priorityData, poolData, activities] = await Promise.all(
+  const [stats, trends, priorityData, poolData, activities, emailActionData] = await Promise.all(
     [
       getDashboardStats(),
       getRegistrationTrends(30),
       getPriorityDistribution(),
       getPoolBreakdown(),
-      getRecentActivities(10),
+      getRecentActivities(5),
+      getEmailActionStats(),
     ]
   );
 
@@ -55,15 +58,22 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        {/* Charts Row 2: Pool Breakdown + Activity Feed */}
-        <div className="grid gap-6 lg:grid-cols-2">
-          <PoolBarChart data={poolData} title={t("poolBreakdown")} />
-          <ActivityFeed
-            activities={activities}
-            title={t("recentActivity")}
-            locale={locale}
-            emptyMessage={t("noActivity")}
-          />
+        {/* Charts Row 2: Pool Breakdown + Recent Activity + Email Actions */}
+        <div className="grid gap-6 lg:grid-cols-3">
+          <div>
+            <PoolBarChart data={poolData} title={t("poolBreakdown")} />
+          </div>
+          <div>
+            <ActivityFeed
+              activities={activities}
+              title={t("recentActivity")}
+              locale={locale}
+              emptyMessage={t("noActivity")}
+            />
+          </div>
+          <div>
+            <EmailActionChart data={emailActionData} title={t("emailActions")} />
+          </div>
         </div>
       </div>
     </div>

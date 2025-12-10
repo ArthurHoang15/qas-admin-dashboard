@@ -21,9 +21,9 @@ export function PoolBarChart({ data, title }: PoolBarChartProps) {
   const maxValue = Math.max(...data.map((d) => d.value), 1);
 
   return (
-    <div className="rounded-xl border border-border bg-card p-6">
+    <div className="rounded-xl border border-border bg-card p-6 h-full">
       <h3 className="mb-4 text-sm font-medium text-foreground">{title}</h3>
-      <div className="space-y-4">
+      <div className="space-y-3">
         {data.map((item) => {
           const percentage = (item.value / maxValue) * 100;
           const color = POOL_COLORS[item.name] || "#6b7280";
