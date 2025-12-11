@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
-import { LayoutDashboard, Mail, Users, LogOut } from "lucide-react";
+import { LayoutDashboard, Mail, Users, LogOut, Send } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import { useTransition } from "react";
 
@@ -15,6 +15,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { href: "/dashboard", labelKey: "dashboard", icon: LayoutDashboard },
   { href: "/dashboard/templates", labelKey: "templates", icon: Mail },
+  { href: "/dashboard/email-sender", labelKey: "emailSender", icon: Send },
   { href: "/dashboard/registrations", labelKey: "registrations", icon: Users },
 ];
 
