@@ -27,7 +27,7 @@ export function EmailSenderForm({ templates }: EmailSenderFormProps) {
 
   // Form state
   const [formData, setFormData] = useState<EmailFormData>({
-    from: "QAS Academy <info@qasacademy.com>",
+    from: "QAS Academy <info@qascademy.com>",
     to: "",
     names: "",
     cc: "",
