@@ -88,6 +88,20 @@ export function EmailSenderForm({ templates }: EmailSenderFormProps) {
       const result = await sendEmails(formData);
       setSendResult(result);
       setShowResultModal(true);
+
+      // Clear form after successful send
+      if (result.success || result.totalSent > 0) {
+        setFormData({
+          from: formData.from,
+          to: "",
+          names: "",
+          cc: "",
+          subject: "",
+          htmlContent: "",
+          plainText: "",
+          templateCode: null,
+        });
+      }
     });
   };
 
@@ -105,7 +119,7 @@ export function EmailSenderForm({ templates }: EmailSenderFormProps) {
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-6 lg:grid-cols-2 items-stretch">
         {/* Left Column - Form */}
         <Card>
           <CardHeader>
@@ -243,12 +257,13 @@ export function EmailSenderForm({ templates }: EmailSenderFormProps) {
         </Card>
 
         {/* Right Column - Preview */}
-        <div className="lg:sticky lg:top-6 lg:h-fit">
+        <div className="flex flex-col lg:sticky lg:top-6">
           <EmailPreviewPanel
             html={formData.htmlContent}
             subject={formData.subject}
             sampleEmail={previewSample.email}
             sampleName={previewSample.name}
+            className="flex-1"
           />
         </div>
       </div>

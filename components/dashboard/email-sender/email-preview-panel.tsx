@@ -44,7 +44,7 @@ export function EmailPreviewPanel({
   );
 
   return (
-    <div className={`space-y-3 ${className}`}>
+    <div className={`flex flex-col gap-3 ${className}`}>
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-medium text-foreground">{t("preview")}</h3>
         <span className="text-xs text-muted-foreground">
@@ -63,7 +63,7 @@ export function EmailPreviewPanel({
       )}
 
       {/* HTML preview */}
-      <div className="rounded-lg border border-border bg-card overflow-hidden">
+      <div className="flex-1 min-h-[400px] rounded-lg border border-border bg-card overflow-hidden flex flex-col">
         {/* Browser chrome */}
         <div className="flex items-center gap-1.5 border-b border-border bg-muted/50 px-3 py-2">
           <div className="h-2.5 w-2.5 rounded-full bg-red-500" />
@@ -72,7 +72,7 @@ export function EmailPreviewPanel({
         </div>
 
         {/* Preview content */}
-        <div className="h-[400px] overflow-auto bg-white">
+        <div className="flex-1 overflow-auto bg-white">
           {previewHtml ? (
             <iframe
               srcDoc={previewHtml}

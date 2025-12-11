@@ -23,12 +23,12 @@ export default async function TemplateDetailPage({ params }: TemplateDetailPageP
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="h-screen bg-background flex flex-col overflow-hidden">
       <Header title={template.template_code} />
 
-      <div className="p-6 space-y-6">
+      <div className="flex-1 p-6 flex flex-col gap-4 min-h-0">
         {/* Back Button & Actions */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between shrink-0">
           <Link
             href="/dashboard/templates"
             className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -45,15 +45,15 @@ export default async function TemplateDetailPage({ params }: TemplateDetailPageP
         </div>
 
         {/* Template Info */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="space-y-4">
-            <div className="rounded-xl border border-border bg-card p-6">
-              <h2 className="text-lg font-semibold text-foreground mb-4">
+        <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6 min-h-0">
+          <div className="flex flex-col min-h-0">
+            <div className="flex-1 rounded-xl border border-border bg-card p-6 flex flex-col min-h-0 overflow-hidden">
+              <h2 className="text-lg font-semibold text-foreground mb-4 shrink-0">
                 Template Details
               </h2>
 
-              <dl className="space-y-4">
-                <div>
+              <dl className="flex-1 flex flex-col gap-4 min-h-0 overflow-hidden">
+                <div className="shrink-0">
                   <dt className="text-sm font-medium text-muted-foreground">
                     {t("code")}
                   </dt>
@@ -62,7 +62,7 @@ export default async function TemplateDetailPage({ params }: TemplateDetailPageP
                   </dd>
                 </div>
 
-                <div>
+                <div className="shrink-0">
                   <dt className="text-sm font-medium text-muted-foreground">
                     {t("subject")}
                   </dt>
@@ -72,7 +72,7 @@ export default async function TemplateDetailPage({ params }: TemplateDetailPageP
                 </div>
 
                 {template.description && (
-                  <div>
+                  <div className="shrink-0">
                     <dt className="text-sm font-medium text-muted-foreground">
                       {t("description")}
                     </dt>
@@ -82,12 +82,12 @@ export default async function TemplateDetailPage({ params }: TemplateDetailPageP
                   </div>
                 )}
 
-                <div>
-                  <dt className="text-sm font-medium text-muted-foreground">
+                <div className="flex-1 flex flex-col min-h-0">
+                  <dt className="text-sm font-medium text-muted-foreground shrink-0">
                     {t("content")}
                   </dt>
-                  <dd className="mt-2">
-                    <pre className="p-4 rounded-lg bg-muted text-xs overflow-x-auto max-h-[300px] overflow-y-auto">
+                  <dd className="mt-2 flex-1 min-h-0">
+                    <pre className="h-full p-4 rounded-lg bg-muted text-xs overflow-auto">
                       <code>{template.html_content}</code>
                     </pre>
                   </dd>
@@ -97,13 +97,13 @@ export default async function TemplateDetailPage({ params }: TemplateDetailPageP
           </div>
 
           {/* Preview */}
-          <div>
-            <div className="mb-2">
+          <div className="flex flex-col min-h-0">
+            <div className="mb-2 shrink-0">
               <span className="text-sm font-medium text-foreground">
                 {t("preview")}
               </span>
             </div>
-            <HtmlPreview html={template.html_content} className="h-[500px]" />
+            <HtmlPreview html={template.html_content} className="flex-1 min-h-0" />
           </div>
         </div>
       </div>
