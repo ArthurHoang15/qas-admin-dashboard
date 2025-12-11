@@ -8,6 +8,7 @@ interface TrendAreaChartProps {
   title: string;
   registrationsLabel?: string;
   locale?: string;
+  emptyMessage?: string;
 }
 
 function CustomTooltip({ payload, active, label }: CustomTooltipProps) {
@@ -31,7 +32,19 @@ function CustomTooltip({ payload, active, label }: CustomTooltipProps) {
   );
 }
 
-export function TrendAreaChart({ data, title, registrationsLabel = "Registrations", locale = "en" }: TrendAreaChartProps) {
+export function TrendAreaChart({ data, title, registrationsLabel = "Registrations", locale = "en", emptyMessage = "No data available" }: TrendAreaChartProps) {
+  // Handle empty data
+  if (data.length === 0) {
+    return (
+      <div className="rounded-xl border border-border bg-card p-6 h-full">
+        <h3 className="mb-4 text-sm font-medium text-foreground">{title}</h3>
+        <div className="h-72 flex items-center justify-center">
+          <p className="text-sm text-muted-foreground italic">{emptyMessage}</p>
+        </div>
+      </div>
+    );
+  }
+
   // Format dates for display based on locale
   const dateLocale = locale === "vi" ? "vi-VN" : "en-US";
   const formattedData = data.map((point) => ({
@@ -43,7 +56,7 @@ export function TrendAreaChart({ data, title, registrationsLabel = "Registration
   }));
 
   return (
-    <div className="rounded-xl border border-border bg-card p-6 h-full">
+    <div className="rounded-xl border border-border bg-card p-6 h-full dashboard-chart">
       <h3 className="mb-4 text-sm font-medium text-foreground">{title}</h3>
       <AreaChart
         className="h-72 [&_.recharts-cartesian-axis-tick-value]:fill-foreground [&_.recharts-cartesian-grid-horizontal_line]:stroke-border [&_.recharts-cartesian-grid-vertical_line]:stroke-border"

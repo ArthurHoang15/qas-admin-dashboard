@@ -79,35 +79,35 @@ body {
   background: var(--foreground);
 }
 
-/* Tremor chart overrides for better contrast */
-.tremor-Legend-legendItem {
+/* Tremor chart overrides for better contrast - scoped to dashboard charts */
+.dashboard-chart .tremor-Legend-legendItem {
   color: var(--foreground) !important;
 }
 
-.tremor-Legend-legendDot {
+.dashboard-chart .tremor-Legend-legendDot {
   width: 10px !important;
   height: 10px !important;
 }
 
-/* Dark mode Tremor adjustments */
+/* Dark mode Tremor adjustments - scoped to dashboard charts */
 @media (prefers-color-scheme: dark) {
-  .tremor-AreaChart-area {
+  .dashboard-chart .tremor-AreaChart-area {
     opacity: 0.8;
   }
 
-  .tremor-BarList-bar {
+  .dashboard-chart .tremor-BarList-bar {
     opacity: 0.9;
   }
 
-  [class*="tremor"] text {
+  .dashboard-chart [class*="tremor"] text {
     fill: var(--foreground) !important;
   }
 
-  .recharts-cartesian-axis-tick-value {
+  .dashboard-chart .recharts-cartesian-axis-tick-value {
     fill: var(--muted-foreground) !important;
   }
 
-  .recharts-tooltip-wrapper .recharts-default-tooltip {
+  .dashboard-chart .recharts-tooltip-wrapper .recharts-default-tooltip {
     background-color: var(--card) !important;
     border-color: var(--border) !important;
   }

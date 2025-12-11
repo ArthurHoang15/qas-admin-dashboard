@@ -19,17 +19,31 @@ export default async function DashboardPage() {
   const t = await getTranslations("dashboard");
   const locale = await getLocale();
 
-  // Fetch all dashboard data in parallel
-  const [stats, trends, priorityData, poolData, activities, emailActionData] = await Promise.all(
-    [
-      getDashboardStats(),
-      getRegistrationTrends(30),
-      getPriorityDistribution(),
-      getPoolBreakdown(),
-      getRecentActivities(5),
-      getEmailActionStats(),
-    ]
-  );
+  // Fetch all dashboard data in parallel with error resilience
+  const results = await Promise.allSettled([
+    getDashboardStats(),
+    getRegistrationTrends(30),
+    getPriorityDistribution(),
+    getPoolBreakdown(),
+    getRecentActivities(5),
+    getEmailActionStats(),
+  ]);
+
+  // Extract values with fallbacks for any failed requests
+  const stats = results[0].status === "fulfilled" ? results[0].value : {
+    totalRegistrations: 0,
+    qualifiedCount: 0,
+    completedCount: 0,
+    thisMonthCount: 0,
+    lastMonthCount: 0,
+    qualifiedLastMonth: 0,
+    completedLastMonth: 0,
+  };
+  const trends = results[1].status === "fulfilled" ? results[1].value : [];
+  const priorityData = results[2].status === "fulfilled" ? results[2].value : [];
+  const poolData = results[3].status === "fulfilled" ? results[3].value : [];
+  const activities = results[4].status === "fulfilled" ? results[4].value : [];
+  const emailActionData = results[5].status === "fulfilled" ? results[5].value : [];
 
   return (
     <div className="min-h-screen bg-background">
@@ -51,17 +65,17 @@ export default async function DashboardPage() {
         {/* Charts Row 1: Trend + Priority */}
         <div className="grid gap-6 lg:grid-cols-3">
           <div className="lg:col-span-2">
-            <TrendAreaChart data={trends} title={t("trends")} registrationsLabel={t("registrationsLabel")} locale={locale} />
+            <TrendAreaChart data={trends} title={t("trends")} registrationsLabel={t("registrationsLabel")} locale={locale} emptyMessage={t("noData")} />
           </div>
           <div className="lg:col-span-1">
-            <PriorityDonutChart data={priorityData} title={t("priorityBreakdown")} />
+            <PriorityDonutChart data={priorityData} title={t("priorityBreakdown")} emptyMessage={t("noData")} />
           </div>
         </div>
 
         {/* Charts Row 2: Pool Breakdown + Recent Activity + Email Actions */}
         <div className="grid gap-6 lg:grid-cols-3">
           <div>
-            <PoolBarChart data={poolData} title={t("poolBreakdown")} />
+            <PoolBarChart data={poolData} title={t("poolBreakdown")} emptyMessage={t("noData")} />
           </div>
           <div>
             <ActivityFeed
@@ -76,7 +90,7 @@ export default async function DashboardPage() {
             />
           </div>
           <div>
-            <EmailActionChart data={emailActionData} title={t("emailActions")} />
+            <EmailActionChart data={emailActionData} title={t("emailActions")} emptyMessage={t("noData")} />
           </div>
         </div>
       </div>

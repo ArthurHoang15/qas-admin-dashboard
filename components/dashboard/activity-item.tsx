@@ -70,6 +70,14 @@ function getTimeAgo(timestamp: string, locale: string): string {
 
   const isVi = locale === "vi";
 
+  // Handle future timestamps (clock skew or scheduled items)
+  if (diffInSeconds < 0) {
+    return date.toLocaleDateString(locale === "vi" ? "vi-VN" : "en-US", {
+      month: "short",
+      day: "numeric",
+    });
+  }
+
   if (diffInSeconds < 60) {
     return isVi ? "Vừa xong" : "Just now";
   }
@@ -95,7 +103,7 @@ function getTimeAgo(timestamp: string, locale: string): string {
       : `${diffInDays}d ago`;
   }
 
-  return date.toLocaleDateString(locale, {
+  return date.toLocaleDateString(locale === "vi" ? "vi-VN" : "en-US", {
     month: "short",
     day: "numeric",
   });

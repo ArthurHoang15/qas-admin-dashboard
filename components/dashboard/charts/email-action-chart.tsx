@@ -5,6 +5,7 @@ import type { EmailActionStats } from "@/lib/types/dashboard";
 interface EmailActionChartProps {
   data: EmailActionStats[];
   title: string;
+  emptyMessage?: string;
 }
 
 // Colors for different email actions
@@ -14,8 +15,28 @@ const ACTION_COLORS: Record<string, string> = {
   "Clicked": "#10b981",
 };
 
-export function EmailActionChart({ data, title }: EmailActionChartProps) {
+export function EmailActionChart({ data, title, emptyMessage = "No data available" }: EmailActionChartProps) {
   const total = data.reduce((sum, item) => sum + item.count, 0);
+
+  // Handle empty data
+  if (data.length === 0) {
+    return (
+      <div className="rounded-xl border border-border bg-card p-6 h-full">
+        <h3 className="mb-4 text-sm font-medium text-foreground">{title}</h3>
+        <div className="flex flex-col items-center justify-center gap-4 h-[calc(100%-2rem)]">
+          <div className="relative">
+            <div className="w-32 h-32 rounded-full bg-muted" />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-20 h-20 rounded-full bg-card flex items-center justify-center">
+                <span className="text-xl font-bold text-foreground">0</span>
+              </div>
+            </div>
+          </div>
+          <p className="text-sm text-muted-foreground italic">{emptyMessage}</p>
+        </div>
+      </div>
+    );
+  }
 
   // Ensure all 3 actions are present (None, Opened, Clicked)
   const allActions = ["None", "Opened", "Clicked"];

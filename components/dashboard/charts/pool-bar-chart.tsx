@@ -5,6 +5,7 @@ import type { PoolBreakdown } from "@/lib/types/dashboard";
 interface PoolBarChartProps {
   data: PoolBreakdown[];
   title: string;
+  emptyMessage?: string;
 }
 
 // High contrast colors for pool bars
@@ -17,7 +18,7 @@ const POOL_COLORS: Record<string, string> = {
   Giveaway: "#ec4899",
 };
 
-export function PoolBarChart({ data, title }: PoolBarChartProps) {
+export function PoolBarChart({ data, title, emptyMessage = "No data available" }: PoolBarChartProps) {
   const maxValue = Math.max(...data.map((d) => d.value), 1);
 
   return (
@@ -48,7 +49,7 @@ export function PoolBarChart({ data, title }: PoolBarChartProps) {
         })}
         {data.length === 0 && (
           <p className="text-center text-sm text-muted-foreground italic py-4">
-            No data available
+            {emptyMessage}
           </p>
         )}
       </div>

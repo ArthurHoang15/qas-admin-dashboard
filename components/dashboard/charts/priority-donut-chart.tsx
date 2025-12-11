@@ -5,6 +5,7 @@ import type { PriorityDistribution } from "@/lib/types/dashboard";
 interface PriorityDonutChartProps {
   data: PriorityDistribution[];
   title: string;
+  emptyMessage?: string;
 }
 
 // Distinct high contrast colors for each priority level
@@ -17,7 +18,27 @@ const PRIORITY_HEX_COLORS: Record<string, string> = {
   gray: "#6b7280",
 };
 
-export function PriorityDonutChart({ data, title }: PriorityDonutChartProps) {
+export function PriorityDonutChart({ data, title, emptyMessage = "No data available" }: PriorityDonutChartProps) {
+  // Handle empty data
+  if (data.length === 0) {
+    return (
+      <div className="rounded-xl border border-border bg-card p-6 h-full">
+        <h3 className="mb-4 text-sm font-medium text-foreground">{title}</h3>
+        <div className="flex flex-col items-center justify-center gap-6 h-[calc(100%-2rem)]">
+          <div className="relative">
+            <div className="w-48 h-48 rounded-full bg-muted" />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-28 h-28 rounded-full bg-card flex items-center justify-center">
+                <span className="text-2xl font-bold text-foreground">0</span>
+              </div>
+            </div>
+          </div>
+          <p className="text-sm text-muted-foreground italic">{emptyMessage}</p>
+        </div>
+      </div>
+    );
+  }
+
   const total = data.reduce((sum, item) => sum + item.value, 0);
 
   // Calculate segments for the donut chart
@@ -37,6 +58,7 @@ export function PriorityDonutChart({ data, title }: PriorityDonutChartProps) {
 
   // Create conic gradient for donut
   const gradientStops = segments
+    .filter((seg) => seg.percent > 0)
     .map((seg) => `${seg.color} ${seg.startPercent}% ${seg.endPercent}%`)
     .join(", ");
 
