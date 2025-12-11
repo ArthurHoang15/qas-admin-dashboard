@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,7 +9,7 @@ import { Registration } from "@/lib/types";
 import { PriorityBadge } from "./priority-badge";
 import { PoolBadge } from "./pool-badge";
 import { StatusBadge } from "./status-badge";
-import { Link } from "@/i18n/navigation";
+import { RegistrationDetailModal } from "./registration-detail-modal";
 
 interface RegistrationsTableProps {
   registrations: Registration[];
@@ -17,6 +18,19 @@ interface RegistrationsTableProps {
 export function RegistrationsTable({ registrations }: RegistrationsTableProps) {
   const t = useTranslations("registrations");
   const locale = useLocale();
+  const [selectedRegistration, setSelectedRegistration] =
+    useState<Registration | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleViewDetails = (registration: Registration) => {
+    setSelectedRegistration(registration);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedRegistration(null);
+  };
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return "-";
@@ -101,22 +115,27 @@ export function RegistrationsTable({ registrations }: RegistrationsTableProps) {
                   {formatDate(registration.created_at)}
                 </td>
                 <td className="px-4 py-3 text-sm text-right whitespace-nowrap">
-                  <Link href={`/dashboard/registrations/${registration.id}`}>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 w-8 p-0"
-                      aria-label={t("actions")}
-                    >
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                  </Link>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-10 w-10 p-0"
+                    aria-label={t("actions")}
+                    onClick={() => handleViewDetails(registration)}
+                  >
+                    <Eye className="h-6 w-6" />
+                  </Button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+
+      <RegistrationDetailModal
+        registration={selectedRegistration}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+      />
     </Card>
   );
 }

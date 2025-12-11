@@ -20,7 +20,7 @@ export async function getTemplates(search?: string): Promise<EmailTemplate[]> {
     return result.rows as EmailTemplate[];
   } catch (error) {
     console.error("Error fetching templates:", error);
-    throw new Error("Failed to fetch templates");
+    return [];
   }
 }
 
@@ -38,7 +38,7 @@ export async function getTemplateByCode(code: string): Promise<EmailTemplate | n
     return result.rows[0] as EmailTemplate;
   } catch (error) {
     console.error("Error fetching template:", error);
-    throw new Error("Failed to fetch template");
+    return null;
   }
 }
 

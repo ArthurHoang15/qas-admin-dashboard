@@ -6,4 +6,4 @@ export { RegistrationsTable } from "./registrations-table";
 export { CSVExportButton } from "./csv-export-button";
 export { CSVImportModal } from "./csv-import-modal";
 export { RegistrationsContent } from "./registrations-content";
-export { RegistrationDetail } from "./registration-detail";
+export { RegistrationDetailModal } from "./registration-detail-modal";

@@ -23,9 +23,10 @@ export async function getRegistrations(
   filters: RegistrationFilters,
   pagination: PaginationParams
 ): Promise<PaginatedResult<Registration>> {
+  const { page = 1, limit = 10, sortBy = "created_at", sortOrder = "desc" } = pagination;
+
   try {
     const { search, priority_level, engagement_pool, is_qualified, is_completed } = filters;
-    const { page, limit, sortBy = "created_at", sortOrder = "desc" } = pagination;
     const offset = (page - 1) * limit;
 
     // Build WHERE clause
@@ -99,7 +100,13 @@ export async function getRegistrations(
     };
   } catch (error) {
     console.error("Error fetching registrations:", error);
-    throw new Error("Failed to fetch registrations");
+    return {
+      data: [],
+      total: 0,
+      page,
+      limit,
+      totalPages: 0,
+    };
   }
 }
 
@@ -117,7 +124,7 @@ export async function getRegistrationById(id: number): Promise<Registration | nu
     return result.rows[0] as Registration;
   } catch (error) {
     console.error("Error fetching registration:", error);
-    throw new Error("Failed to fetch registration");
+    return null;
   }
 }
 
@@ -141,7 +148,10 @@ export async function getFilterOptions(): Promise<FilterOptions> {
     };
   } catch (error) {
     console.error("Error fetching filter options:", error);
-    throw new Error("Failed to fetch filter options");
+    return {
+      engagement_pools: [],
+      priority_levels: [],
+    };
   }
 }
 
@@ -197,7 +207,7 @@ export async function exportRegistrations(
     return result.rows as Registration[];
   } catch (error) {
     console.error("Error exporting registrations:", error);
-    throw new Error("Failed to export registrations");
+    return [];
   }
 }
 

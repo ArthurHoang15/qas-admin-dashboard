@@ -8,7 +8,7 @@ interface ModalProps {
   onClose: () => void;
   title?: string;
   children: ReactNode;
-  size?: "sm" | "md" | "lg" | "xl";
+  size?: "sm" | "md" | "lg" | "xl" | "2xl" | "3xl" | "4xl";
 }
 
 export function Modal({ isOpen, onClose, title, children, size = "md" }: ModalProps) {
@@ -37,10 +37,13 @@ export function Modal({ isOpen, onClose, title, children, size = "md" }: ModalPr
     md: "max-w-md",
     lg: "max-w-lg",
     xl: "max-w-xl",
+    "2xl": "max-w-2xl",
+    "3xl": "max-w-3xl",
+    "4xl": "max-w-4xl",
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
       <div
         className="fixed inset-0 bg-black/50 backdrop-blur-sm"
@@ -49,11 +52,11 @@ export function Modal({ isOpen, onClose, title, children, size = "md" }: ModalPr
 
       {/* Modal */}
       <div
-        className={`relative z-50 w-full ${sizes[size]} mx-4 rounded-xl border border-border bg-card shadow-lg animate-in fade-in zoom-in-95 duration-200`}
+        className={`relative z-50 w-full ${sizes[size]} max-h-[90vh] flex flex-col rounded-xl border border-border bg-card shadow-lg animate-in fade-in zoom-in-95 duration-200`}
       >
         {/* Header */}
         {title && (
-          <div className="flex items-center justify-between border-b border-border px-6 py-4">
+          <div className="flex items-center justify-between border-b border-border px-6 py-4 shrink-0">
             <h2 className="text-lg font-semibold text-foreground">{title}</h2>
             <button
               onClick={onClose}
@@ -64,8 +67,8 @@ export function Modal({ isOpen, onClose, title, children, size = "md" }: ModalPr
           </div>
         )}
 
-        {/* Body */}
-        <div className="p-6">{children}</div>
+        {/* Body - scrollable */}
+        <div className="p-6 overflow-y-auto">{children}</div>
       </div>
     </div>
   );
