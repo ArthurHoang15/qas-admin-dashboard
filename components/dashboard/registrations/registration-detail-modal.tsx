@@ -51,6 +51,7 @@ export function RegistrationDetailModal({
     });
   };
 
+  // Early return if no registration - also narrows type for TypeScript
   if (!registration) return null;
 
   return (
