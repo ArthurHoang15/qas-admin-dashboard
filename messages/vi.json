@@ -94,9 +94,15 @@
     "completed": "Hoàn thành",
     "thisMonth": "Tháng này",
     "trends": "Xu hướng đăng ký",
+    "registrationsLabel": "Đăng ký",
     "priorityBreakdown": "Phân bổ ưu tiên",
     "poolBreakdown": "Phân bổ nhóm",
     "recentActivity": "Hoạt động gần đây",
-    "fromLastMonth": "so với tháng trước"
+    "emailActions": "Hành động Email",
+    "fromLastMonth": "so với tháng trước",
+    "noActivity": "Không có hoạt động gần đây",
+    "noData": "Không có dữ liệu",
+    "registered": "Đã đăng ký",
+    "draft": "Bản nháp"
   }
 }

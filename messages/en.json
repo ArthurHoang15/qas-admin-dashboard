@@ -94,9 +94,15 @@
     "completed": "Completed",
     "thisMonth": "This Month",
     "trends": "Registration Trends",
+    "registrationsLabel": "Registrations",
     "priorityBreakdown": "Priority Breakdown",
     "poolBreakdown": "Pool Breakdown",
     "recentActivity": "Recent Activity",
-    "fromLastMonth": "from last month"
+    "emailActions": "Email Actions",
+    "fromLastMonth": "from last month",
+    "noActivity": "No recent activity",
+    "noData": "No data available",
+    "registered": "Registered",
+    "draft": "Draft"
   }
 }

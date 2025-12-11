@@ -1,22 +1,49 @@
-import { query } from "@/lib/db";
-import { getTranslations } from "next-intl/server";
+import { getTranslations, getLocale } from "next-intl/server";
 import { Header } from "@/components/layout";
-
-interface PriorityStat {
-  priority_level: number;
-  count: string;
-}
+import { StatsGrid } from "@/components/dashboard/stats-grid";
+import { TrendAreaChart } from "@/components/dashboard/charts/trend-area-chart";
+import { PriorityDonutChart } from "@/components/dashboard/charts/priority-donut-chart";
+import { PoolBarChart } from "@/components/dashboard/charts/pool-bar-chart";
+import { EmailActionChart } from "@/components/dashboard/charts/email-action-chart";
+import { ActivityFeed } from "@/components/dashboard/activity-feed";
+import {
+  getDashboardStats,
+  getRegistrationTrends,
+  getPriorityDistribution,
+  getPoolBreakdown,
+  getRecentActivities,
+  getEmailActionStats,
+} from "@/actions/dashboard-actions";
 
 export default async function DashboardPage() {
   const t = await getTranslations("dashboard");
+  const locale = await getLocale();
 
-  const totalRes = await query("SELECT count(*) FROM qas_registrations");
-  const totalCount = Number(totalRes.rows[0].count);
+  // Fetch all dashboard data in parallel with error resilience
+  const results = await Promise.allSettled([
+    getDashboardStats(),
+    getRegistrationTrends(30),
+    getPriorityDistribution(),
+    getPoolBreakdown(),
+    getRecentActivities(5),
+    getEmailActionStats(),
+  ]);
 
-  const priorityRes = await query(
-    "SELECT priority_level, count(*) FROM qas_registrations GROUP BY priority_level ORDER BY priority_level ASC"
-  );
-  const priorityStats = priorityRes.rows as PriorityStat[];
+  // Extract values with fallbacks for any failed requests
+  const stats = results[0].status === "fulfilled" ? results[0].value : {
+    totalRegistrations: 0,
+    qualifiedCount: 0,
+    completedCount: 0,
+    thisMonthCount: 0,
+    lastMonthCount: 0,
+    qualifiedLastMonth: 0,
+    completedLastMonth: 0,
+  };
+  const trends = results[1].status === "fulfilled" ? results[1].value : [];
+  const priorityData = results[2].status === "fulfilled" ? results[2].value : [];
+  const poolData = results[3].status === "fulfilled" ? results[3].value : [];
+  const activities = results[4].status === "fulfilled" ? results[4].value : [];
+  const emailActionData = results[5].status === "fulfilled" ? results[5].value : [];
 
   return (
     <div className="min-h-screen bg-background">
@@ -24,93 +51,46 @@ export default async function DashboardPage() {
 
       <div className="p-6 space-y-6">
         {/* Stats Grid */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {/* Total Registrations */}
-          <div className="rounded-xl border border-border bg-card p-6">
-            <h3 className="text-sm font-medium text-muted-foreground">
-              {t("totalRegistrations")}
-            </h3>
-            <div className="mt-2 text-3xl font-bold text-foreground">
-              {totalCount}
-            </div>
-            <p className="mt-1 text-xs text-muted-foreground">
-              +12% {t("fromLastMonth")}
-            </p>
-          </div>
+        <StatsGrid
+          stats={stats}
+          translations={{
+            totalRegistrations: t("totalRegistrations"),
+            qualified: t("qualified"),
+            completed: t("completed"),
+            thisMonth: t("thisMonth"),
+            fromLastMonth: t("fromLastMonth"),
+          }}
+        />
 
-          {/* Qualified */}
-          <div className="rounded-xl border border-border bg-card p-6">
-            <h3 className="text-sm font-medium text-muted-foreground">
-              {t("qualified")}
-            </h3>
-            <div className="mt-2 text-3xl font-bold text-foreground">
-              --
-            </div>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Coming soon
-            </p>
+        {/* Charts Row 1: Trend + Priority */}
+        <div className="grid gap-6 lg:grid-cols-3">
+          <div className="lg:col-span-2">
+            <TrendAreaChart data={trends} title={t("trends")} registrationsLabel={t("registrationsLabel")} locale={locale} emptyMessage={t("noData")} />
           </div>
-
-          {/* Completed */}
-          <div className="rounded-xl border border-border bg-card p-6">
-            <h3 className="text-sm font-medium text-muted-foreground">
-              {t("completed")}
-            </h3>
-            <div className="mt-2 text-3xl font-bold text-foreground">
-              --
-            </div>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Coming soon
-            </p>
-          </div>
-
-          {/* This Month */}
-          <div className="rounded-xl border border-border bg-card p-6">
-            <h3 className="text-sm font-medium text-muted-foreground">
-              {t("thisMonth")}
-            </h3>
-            <div className="mt-2 text-3xl font-bold text-foreground">
-              --
-            </div>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Coming soon
-            </p>
+          <div className="lg:col-span-1">
+            <PriorityDonutChart data={priorityData} title={t("priorityBreakdown")} emptyMessage={t("noData")} />
           </div>
         </div>
 
-        {/* Priority Breakdown */}
-        <div className="grid gap-4 md:grid-cols-2">
-          <div className="rounded-xl border border-border bg-card p-6">
-            <h3 className="mb-4 text-sm font-medium text-muted-foreground">
-              {t("priorityBreakdown")}
-            </h3>
-            <div className="space-y-3">
-              {priorityStats.map((stat) => (
-                <div
-                  key={stat.priority_level}
-                  className="flex items-center justify-between"
-                >
-                  <span className="text-sm text-muted-foreground">
-                    Level {stat.priority_level}
-                  </span>
-                  <span className="text-sm font-semibold text-foreground">
-                    {stat.count}
-                  </span>
-                </div>
-              ))}
-              {priorityStats.length === 0 && (
-                <p className="text-sm text-muted-foreground italic">
-                  No data available
-                </p>
-              )}
-            </div>
+        {/* Charts Row 2: Pool Breakdown + Recent Activity + Email Actions */}
+        <div className="grid gap-6 lg:grid-cols-3">
+          <div>
+            <PoolBarChart data={poolData} title={t("poolBreakdown")} emptyMessage={t("noData")} />
           </div>
-
-          {/* Placeholder for chart */}
-          <div className="rounded-xl border border-border bg-card p-6 flex items-center justify-center">
-            <span className="text-muted-foreground">
-              Charts coming in Branch 3
-            </span>
+          <div>
+            <ActivityFeed
+              activities={activities}
+              title={t("recentActivity")}
+              locale={locale}
+              emptyMessage={t("noActivity")}
+              translations={{
+                registered: t("registered"),
+                draft: t("draft"),
+              }}
+            />
+          </div>
+          <div>
+            <EmailActionChart data={emailActionData} title={t("emailActions")} emptyMessage={t("noData")} />
           </div>
         </div>
       </div>

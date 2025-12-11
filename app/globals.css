@@ -78,3 +78,37 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--foreground);
 }
+
+/* Tremor chart overrides for better contrast - scoped to dashboard charts */
+.dashboard-chart .tremor-Legend-legendItem {
+  color: var(--foreground) !important;
+}
+
+.dashboard-chart .tremor-Legend-legendDot {
+  width: 10px !important;
+  height: 10px !important;
+}
+
+/* Dark mode Tremor adjustments - scoped to dashboard charts */
+@media (prefers-color-scheme: dark) {
+  .dashboard-chart .tremor-AreaChart-area {
+    opacity: 0.8;
+  }
+
+  .dashboard-chart .tremor-BarList-bar {
+    opacity: 0.9;
+  }
+
+  .dashboard-chart [class*="tremor"] text {
+    fill: var(--foreground) !important;
+  }
+
+  .dashboard-chart .recharts-cartesian-axis-tick-value {
+    fill: var(--muted-foreground) !important;
+  }
+
+  .dashboard-chart .recharts-tooltip-wrapper .recharts-default-tooltip {
+    background-color: var(--card) !important;
+    border-color: var(--border) !important;
+  }
+}
