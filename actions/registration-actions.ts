@@ -21,7 +21,7 @@ const VALID_ENGAGEMENT_POOLS: EngagementPool[] = [
 
 export async function getRegistrations(
   filters: RegistrationFilters,
-  pagination: PaginationParams
+  pagination: PaginationParams = {}
 ): Promise<PaginatedResult<Registration>> {
   const { page = 1, limit = 10, sortBy = "created_at", sortOrder = "desc" } = pagination;
 
