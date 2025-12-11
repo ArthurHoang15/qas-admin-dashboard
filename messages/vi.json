@@ -19,6 +19,7 @@
   "sidebar": {
     "dashboard": "Tổng quan",
     "templates": "Mẫu Email",
+    "emailSender": "Gửi Email",
     "registrations": "Đăng ký"
   },
   "header": {
@@ -41,7 +42,7 @@
     "noTemplates": "Chưa có mẫu email nào",
     "searchPlaceholder": "Tìm kiếm theo mã hoặc tiêu đề...",
     "variables": "Biến",
-    "variablesHint": "Sử dụng '{{email}}' và '{{name}}' để cá nhân hóa"
+    "variablesHint": "Sử dụng '''{{email}}''' và '''{{name}}''' để cá nhân hóa"
   },
   "registrations": {
     "title": "Danh sách Đăng ký",
@@ -104,5 +105,51 @@
     "noData": "Không có dữ liệu",
     "registered": "Đã đăng ký",
     "draft": "Bản nháp"
+  },
+  "emailSender": {
+    "title": "Gửi Email Hàng Loạt",
+    "description": "Gửi email đơn lẻ hoặc hàng loạt sử dụng Resend API",
+    "from": "Từ",
+    "fromPlaceholder": "QAS Academy '<'info@qascademy.com'>'",
+    "fromHint": "Định dạng bắt buộc: \"Tên hiển thị '<'email@domain.com'>'\"",
+    "to": "Đến",
+    "toPlaceholder": "nguoinhan@example.com hoặc email1@example.com, email2@example.com",
+    "names": "Tên",
+    "namesPlaceholder": "Nguyễn Văn A hoặc Nguyễn Văn A, Trần Thị B",
+    "namesHint": "Nhập tên theo thứ tự tương ứng với email để cá nhân hóa",
+    "cc": "CC",
+    "ccPlaceholder": "cc@example.com hoặc cc1@example.com, cc2@example.com",
+    "subject": "Tiêu đề",
+    "subjectPlaceholder": "Tiêu đề email",
+    "htmlContent": "Nội dung HTML",
+    "htmlContentPlaceholder": "'<'h1'>'Xin chào '{{name}}'!'<'/h1'><'p'>'Email của bạn là: '{{email}}''<'/p'>'",
+    "plainText": "Văn bản thuần (Tùy chọn)",
+    "plainTextPlaceholder": "Xin chào '{{name}}'! Email của bạn là: '{{email}}'",
+    "selectTemplate": "Chọn Mẫu",
+    "noTemplate": "-- Không dùng mẫu (tạo mới) --",
+    "sendEmail": "Gửi Email",
+    "sending": "Đang gửi...",
+    "variablesHint": "Sử dụng '{{email}}' và '{{name}}' để cá nhân hóa",
+    "preview": "Xem trước",
+    "previewSample": "Xem trước sử dụng người nhận đầu tiên cho placeholder",
+    "noPreview": "Nhập nội dung HTML để xem trước",
+    "infoTitle": "Cách hoạt động:",
+    "infoSingleEmail": "Email đơn: Nhập một địa chỉ email vào trường \"Đến\"",
+    "infoBatchEmail": "Email hàng loạt: Nhập nhiều địa chỉ email cách nhau bằng dấu phẩy",
+    "infoNames": "Trường Tên: Nhập tên theo thứ tự tương ứng với email để cá nhân hóa",
+    "infoCc": "Trường CC hỗ trợ nhiều người nhận (cách nhau bằng dấu phẩy)",
+    "infoPlaceholders": "Sử dụng '{{email}}' và '{{name}}' trong nội dung HTML để cá nhân hóa",
+    "infoPreview": "Xem trước HTML hiển thị email sẽ trông như thế nào",
+    "infoPlainText": "Văn bản thuần là tùy chọn nhưng được khuyến nghị để tăng khả năng gửi",
+    "resultTitle": "Kết quả gửi",
+    "resultSent": "Email đã gửi",
+    "resultFailed": "Email thất bại",
+    "resultSuccess": "Gửi thành công",
+    "resultError": "Thất bại",
+    "close": "Đóng",
+    "errorFromRequired": "Trường Từ là bắt buộc",
+    "errorToRequired": "Trường Đến là bắt buộc",
+    "errorSubjectRequired": "Tiêu đề là bắt buộc",
+    "errorHtmlRequired": "Nội dung HTML là bắt buộc"
   }
 }

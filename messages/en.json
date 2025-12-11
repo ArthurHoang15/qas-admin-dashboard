@@ -19,6 +19,7 @@
   "sidebar": {
     "dashboard": "Dashboard",
     "templates": "Email Templates",
+    "emailSender": "Send Emails",
     "registrations": "Registrations"
   },
   "header": {
@@ -41,7 +42,7 @@
     "noTemplates": "No email templates yet",
     "searchPlaceholder": "Search by code or subject...",
     "variables": "Variables",
-    "variablesHint": "Use '{{email}}' and '{{name}}' for personalization"
+    "variablesHint": "Use '''{{email}}''' and '''{{name}}''' for personalization"
   },
   "registrations": {
     "title": "Registrations List",
@@ -104,5 +105,51 @@
     "noData": "No data available",
     "registered": "Registered",
     "draft": "Draft"
+  },
+  "emailSender": {
+    "title": "Batch Email Sender",
+    "description": "Send single or batch emails using Resend API",
+    "from": "From",
+    "fromPlaceholder": "QAS Academy '<'info@qascademy.com'>'",
+    "fromHint": "Required format: \"Display Name '<'email@domain.com'>'\"",
+    "to": "To",
+    "toPlaceholder": "recipient@example.com or email1@example.com, email2@example.com",
+    "names": "Names",
+    "namesPlaceholder": "John Doe or John Doe, Jane Smith, Bob Johnson",
+    "namesHint": "Enter names in the same order as emails for personalization",
+    "cc": "CC",
+    "ccPlaceholder": "cc@example.com or cc1@example.com, cc2@example.com",
+    "subject": "Subject",
+    "subjectPlaceholder": "Email subject",
+    "htmlContent": "HTML Content",
+    "htmlContentPlaceholder": "'<'h1'>'Hello '{{name}}'!'<'/h1'><'p'>'Your email is: '{{email}}''<'/p'>'",
+    "plainText": "Plain Text (Optional)",
+    "plainTextPlaceholder": "Hello '{{name}}'! Your email is: '{{email}}'",
+    "selectTemplate": "Select Template",
+    "noTemplate": "-- No template (create new) --",
+    "sendEmail": "Send Email",
+    "sending": "Sending...",
+    "variablesHint": "Use '{{email}}' and '{{name}}' for personalization",
+    "preview": "Preview",
+    "previewSample": "Preview uses first recipient for placeholders",
+    "noPreview": "Enter HTML content to see preview",
+    "infoTitle": "How it works:",
+    "infoSingleEmail": "Single email: Enter one email address in the \"To\" field",
+    "infoBatchEmail": "Batch emails: Enter multiple email addresses separated by commas",
+    "infoNames": "Names field: Enter names in the same order as emails for personalization",
+    "infoCc": "CC field supports multiple recipients (comma-separated)",
+    "infoPlaceholders": "Use '{{email}}' and '{{name}}' in HTML content for personalization",
+    "infoPreview": "HTML preview shows how your email will look",
+    "infoPlainText": "Plain text is optional but recommended for better deliverability",
+    "resultTitle": "Send Results",
+    "resultSent": "Emails sent",
+    "resultFailed": "Emails failed",
+    "resultSuccess": "Sent successfully",
+    "resultError": "Failed",
+    "close": "Close",
+    "errorFromRequired": "From field is required",
+    "errorToRequired": "To field is required",
+    "errorSubjectRequired": "Subject is required",
+    "errorHtmlRequired": "HTML content is required"
   }
 }

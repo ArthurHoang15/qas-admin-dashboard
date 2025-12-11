@@ -66,7 +66,7 @@ export function TemplateForm({ template, mode }: TemplateFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
         {/* Left Column - Form Inputs */}
         <div className="space-y-4">
           <Input
@@ -153,13 +153,13 @@ export function TemplateForm({ template, mode }: TemplateFormProps) {
         </div>
 
         {/* Right Column - Preview */}
-        <div className="lg:sticky lg:top-20">
+        <div className="flex flex-col lg:sticky lg:top-20">
           <div className="mb-2">
             <span className="text-sm font-medium text-foreground">
               {t("preview")}
             </span>
           </div>
-          <HtmlPreview html={formData.html_content} className="h-[500px]" />
+          <HtmlPreview html={formData.html_content} className="flex-1 min-h-[400px]" />
         </div>
       </div>
     </form>
