@@ -5,6 +5,7 @@ import { ArrowLeft } from "lucide-react";
 import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import LanguageSwitcher from "./language-switcher";
+import { ThemeToggle } from "./theme-toggle";
 
 interface HeaderProps {
   title?: string;
@@ -34,7 +35,8 @@ export default function Header({ title, showBack }: HeaderProps) {
           <h1 className="text-xl font-semibold text-foreground">{title}</h1>
         )}
       </div>
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2">
+        <ThemeToggle />
         <LanguageSwitcher />
       </div>
     </header>

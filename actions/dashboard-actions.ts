@@ -40,36 +40,33 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     const firstDayLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     const lastDayLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
 
-    const [totalRes, qualifiedRes, completedRes, thisMonthRes, lastMonthRes, qualifiedLastMonthRes, completedLastMonthRes] =
-      await Promise.all([
-        query("SELECT COUNT(*) FROM qas_registrations"),
-        query("SELECT COUNT(*) FROM qas_registrations WHERE is_qualified = true"),
-        query("SELECT COUNT(*) FROM qas_registrations WHERE is_completed = true"),
-        query("SELECT COUNT(*) FROM qas_registrations WHERE created_at >= $1", [
-          firstDayThisMonth.toISOString(),
-        ]),
-        query(
-          "SELECT COUNT(*) FROM qas_registrations WHERE created_at >= $1 AND created_at <= $2",
-          [firstDayLastMonth.toISOString(), lastDayLastMonth.toISOString()]
-        ),
-        query(
-          "SELECT COUNT(*) FROM qas_registrations WHERE is_qualified = true AND created_at >= $1 AND created_at <= $2",
-          [firstDayLastMonth.toISOString(), lastDayLastMonth.toISOString()]
-        ),
-        query(
-          "SELECT COUNT(*) FROM qas_registrations WHERE is_completed = true AND created_at >= $1 AND created_at <= $2",
-          [firstDayLastMonth.toISOString(), lastDayLastMonth.toISOString()]
-        ),
-      ]);
+    // Single query with FILTER clauses for better performance
+    const result = await query(
+      `SELECT
+        COUNT(*) as total,
+        COUNT(*) FILTER (WHERE is_qualified = true) as qualified,
+        COUNT(*) FILTER (WHERE is_completed = true) as completed,
+        COUNT(*) FILTER (WHERE created_at >= $1) as this_month,
+        COUNT(*) FILTER (WHERE created_at >= $2 AND created_at <= $3) as last_month,
+        COUNT(*) FILTER (WHERE is_qualified = true AND created_at >= $2 AND created_at <= $3) as qualified_last_month,
+        COUNT(*) FILTER (WHERE is_completed = true AND created_at >= $2 AND created_at <= $3) as completed_last_month
+      FROM qas_registrations`,
+      [
+        firstDayThisMonth.toISOString(),
+        firstDayLastMonth.toISOString(),
+        lastDayLastMonth.toISOString(),
+      ]
+    );
 
+    const row = result.rows[0];
     return {
-      totalRegistrations: Number(totalRes.rows[0].count),
-      qualifiedCount: Number(qualifiedRes.rows[0].count),
-      completedCount: Number(completedRes.rows[0].count),
-      thisMonthCount: Number(thisMonthRes.rows[0].count),
-      lastMonthCount: Number(lastMonthRes.rows[0].count),
-      qualifiedLastMonth: Number(qualifiedLastMonthRes.rows[0].count),
-      completedLastMonth: Number(completedLastMonthRes.rows[0].count),
+      totalRegistrations: Number(row.total),
+      qualifiedCount: Number(row.qualified),
+      completedCount: Number(row.completed),
+      thisMonthCount: Number(row.this_month),
+      lastMonthCount: Number(row.last_month),
+      qualifiedLastMonth: Number(row.qualified_last_month),
+      completedLastMonth: Number(row.completed_last_month),
     };
   } catch (error) {
     console.error("Failed to fetch dashboard stats:", error);
