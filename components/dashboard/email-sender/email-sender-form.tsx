@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { sendEmails } from "@/actions/email-actions";
+import { saveCustomTemplate } from "@/actions/template-actions";
 import { TemplateSelector } from "./template-selector";
 import { EmailPreviewPanel } from "./email-preview-panel";
 import { InfoBox } from "./info-box";
@@ -91,6 +92,11 @@ export function EmailSenderForm({ templates }: EmailSenderFormProps) {
 
       // Clear form after successful send
       if (result.success || result.totalSent > 0) {
+        // Auto-save custom template if not using an existing template
+        if (!formData.templateCode && formData.subject && formData.htmlContent) {
+          await saveCustomTemplate(formData.subject, formData.htmlContent);
+        }
+
         setFormData({
           from: formData.from,
           to: "",
