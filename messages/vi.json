@@ -150,6 +150,14 @@
     "errorFromRequired": "Trường Từ là bắt buộc",
     "errorToRequired": "Trường Đến là bắt buộc",
     "errorSubjectRequired": "Tiêu đề là bắt buộc",
-    "errorHtmlRequired": "Nội dung HTML là bắt buộc"
+    "errorHtmlRequired": "Nội dung HTML là bắt buộc",
+    "saveTemplateTitle": "Lưu thay đổi mẫu",
+    "saveTemplateDescription": "Bạn đã chỉnh sửa mẫu \"{code}\". Bạn muốn cập nhật mẫu hiện tại hay lưu thành mẫu mới?",
+    "updateExistingTemplate": "Cập nhật mẫu hiện tại",
+    "saveAsNewTemplate": "Lưu thành mẫu mới",
+    "skipSaving": "Bỏ qua",
+    "templateSaved": "Đã lưu mẫu thành công",
+    "templateUpdated": "Đã cập nhật mẫu thành công",
+    "templateSaveError": "Không thể lưu mẫu"
   }
 }

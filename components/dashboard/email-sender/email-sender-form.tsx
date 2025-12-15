@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,22 +8,38 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { sendEmails } from "@/actions/email-actions";
+import { saveCustomTemplate, updateTemplate } from "@/actions/template-actions";
 import { TemplateSelector } from "./template-selector";
 import { EmailPreviewPanel } from "./email-preview-panel";
 import { InfoBox } from "./info-box";
 import { SendResultModal } from "./send-result-modal";
+import { SaveTemplateModal } from "./save-template-modal";
 import type { EmailTemplate, EmailFormData, BatchEmailResult } from "@/lib/types";
 
 interface EmailSenderFormProps {
   templates: EmailTemplate[];
 }
 
+// Store original template values to detect modifications
+interface OriginalTemplateValues {
+  subject: string;
+  htmlContent: string;
+}
+
 export function EmailSenderForm({ templates }: EmailSenderFormProps) {
   const t = useTranslations("emailSender");
   const [isPending, startTransition] = useTransition();
+  const [isSaving, setIsSaving] = useState(false);
   const [showResultModal, setShowResultModal] = useState(false);
+  const [showSaveTemplateModal, setShowSaveTemplateModal] = useState(false);
   const [sendResult, setSendResult] = useState<BatchEmailResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // Track original template values to detect modifications
+  const originalTemplateRef = useRef<OriginalTemplateValues | null>(null);
+
+  // Store form data to use in save modal callbacks
+  const pendingFormDataRef = useRef<EmailFormData | null>(null);
 
   // Form state
   const [formData, setFormData] = useState<EmailFormData>({
@@ -39,6 +55,11 @@ export function EmailSenderForm({ templates }: EmailSenderFormProps) {
 
   const handleTemplateSelect = (template: EmailTemplate | null) => {
     if (template) {
+      // Store original values for modification detection
+      originalTemplateRef.current = {
+        subject: template.subject,
+        htmlContent: template.html_content,
+      };
       setFormData((prev) => ({
         ...prev,
         templateCode: template.template_code,
@@ -46,6 +67,7 @@ export function EmailSenderForm({ templates }: EmailSenderFormProps) {
         htmlContent: template.html_content,
       }));
     } else {
+      originalTemplateRef.current = null;
       setFormData((prev) => ({
         ...prev,
         templateCode: null,
@@ -53,6 +75,15 @@ export function EmailSenderForm({ templates }: EmailSenderFormProps) {
         htmlContent: "",
       }));
     }
+  };
+
+  // Check if template content has been modified
+  const isTemplateModified = (): boolean => {
+    if (!formData.templateCode || !originalTemplateRef.current) return false;
+    return (
+      formData.subject !== originalTemplateRef.current.subject ||
+      formData.htmlContent !== originalTemplateRef.current.htmlContent
+    );
   };
 
   const handleInputChange = (
@@ -89,20 +120,90 @@ export function EmailSenderForm({ templates }: EmailSenderFormProps) {
       setSendResult(result);
       setShowResultModal(true);
 
-      // Clear form after successful send
+      // Handle post-send actions
       if (result.success || result.totalSent > 0) {
-        setFormData({
-          from: formData.from,
-          to: "",
-          names: "",
-          cc: "",
-          subject: "",
-          htmlContent: "",
-          plainText: "",
-          templateCode: null,
-        });
+        // Check if we need to show save template modal (modified existing template)
+        if (formData.templateCode && isTemplateModified()) {
+          // Store form data for modal callbacks - DON'T clear form yet
+          pendingFormDataRef.current = { ...formData };
+          setShowSaveTemplateModal(true);
+          // Form will be cleared after user makes a choice in the modal
+        } else {
+          // Auto-save custom template if not using an existing template
+          if (!formData.templateCode && formData.subject && formData.htmlContent) {
+            try {
+              const saveResult = await saveCustomTemplate(formData.subject, formData.htmlContent);
+              if (!saveResult.success) {
+                console.error("Failed to save template:", saveResult.error);
+              }
+            } catch (err) {
+              console.error("Error saving template:", err);
+            }
+          }
+          // Clear form only when NOT showing save modal
+          clearForm();
+        }
       }
     });
+  };
+
+  // Clear form helper
+  const clearForm = () => {
+    setFormData({
+      from: formData.from,
+      to: "",
+      names: "",
+      cc: "",
+      subject: "",
+      htmlContent: "",
+      plainText: "",
+      templateCode: null,
+    });
+    originalTemplateRef.current = null;
+    pendingFormDataRef.current = null;
+  };
+
+  // Handle update existing template
+  const handleUpdateExisting = async () => {
+    const data = pendingFormDataRef.current;
+    if (!data?.templateCode) return;
+
+    setIsSaving(true);
+    try {
+      const result = await updateTemplate(data.templateCode, {
+        subject: data.subject,
+        html_content: data.htmlContent, // EmailFormData uses htmlContent, but API expects html_content
+      });
+      if (!result.success) {
+        console.error("Failed to update template:", result.error);
+      }
+    } catch (err) {
+      console.error("Error updating template:", err);
+    } finally {
+      setIsSaving(false);
+      setShowSaveTemplateModal(false);
+      clearForm(); // Clear form after user makes their choice
+    }
+  };
+
+  // Handle save as new template
+  const handleSaveAsNew = async () => {
+    const data = pendingFormDataRef.current;
+    if (!data?.subject || !data?.htmlContent) return;
+
+    setIsSaving(true);
+    try {
+      const result = await saveCustomTemplate(data.subject, data.htmlContent);
+      if (!result.success) {
+        console.error("Failed to save template:", result.error);
+      }
+    } catch (err) {
+      console.error("Error saving template:", err);
+    } finally {
+      setIsSaving(false);
+      setShowSaveTemplateModal(false);
+      clearForm(); // Clear form after user makes their choice
+    }
   };
 
   // Get first email/name for preview sample
@@ -276,6 +377,19 @@ export function EmailSenderForm({ templates }: EmailSenderFormProps) {
         isOpen={showResultModal}
         onClose={() => setShowResultModal(false)}
         result={sendResult}
+      />
+
+      {/* Save Template Modal */}
+      <SaveTemplateModal
+        isOpen={showSaveTemplateModal}
+        onClose={() => {
+          setShowSaveTemplateModal(false);
+          clearForm(); // Clear form when user skips saving
+        }}
+        templateCode={pendingFormDataRef.current?.templateCode || ""}
+        onUpdateExisting={handleUpdateExisting}
+        onSaveAsNew={handleSaveAsNew}
+        isPending={isSaving}
       />
     </div>
   );

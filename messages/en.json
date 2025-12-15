@@ -150,6 +150,14 @@
     "errorFromRequired": "From field is required",
     "errorToRequired": "To field is required",
     "errorSubjectRequired": "Subject is required",
-    "errorHtmlRequired": "HTML content is required"
+    "errorHtmlRequired": "HTML content is required",
+    "saveTemplateTitle": "Save Template Changes",
+    "saveTemplateDescription": "You have modified the template \"{code}\". Would you like to update the existing template or save as a new one?",
+    "updateExistingTemplate": "Update existing template",
+    "saveAsNewTemplate": "Save as new template",
+    "skipSaving": "Skip saving",
+    "templateSaved": "Template saved successfully",
+    "templateUpdated": "Template updated successfully",
+    "templateSaveError": "Failed to save template"
   }
 }
