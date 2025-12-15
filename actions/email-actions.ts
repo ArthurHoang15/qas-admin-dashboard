@@ -9,8 +9,19 @@ import type {
   SingleEmailResult,
 } from "@/lib/types";
 
-// Initialize Resend client
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Lazy initialization of Resend client to avoid build-time errors
+let resendClient: Resend | null = null;
+
+function getResendClient(): Resend {
+  if (!resendClient) {
+    const apiKey = process.env.RESEND_API_KEY;
+    if (!apiKey) {
+      throw new Error("RESEND_API_KEY environment variable is not configured");
+    }
+    resendClient = new Resend(apiKey);
+  }
+  return resendClient;
+}
 
 /**
  * Parse comma-separated emails into array
@@ -182,7 +193,7 @@ export async function sendEmails(
       const prepared = prepareEmail(formData, recipients[0], ccEmails);
 
       try {
-        const { data, error } = await resend.emails.send({
+        const { data, error } = await getResendClient().emails.send({
           from: prepared.from,
           to: prepared.to,
           cc: prepared.cc,
@@ -244,7 +255,7 @@ export async function sendEmails(
     let totalFailed = 0;
 
     try {
-      const { data, error } = await resend.batch.send(
+      const { data, error } = await getResendClient().batch.send(
         preparedEmails.map((email) => ({
           from: email.from,
           to: email.to,
