@@ -4,6 +4,12 @@ import { query } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { EmailTemplate, EmailTemplateCreateInput, EmailTemplateUpdateInput } from "@/lib/types";
 
+// Constants for template code generation
+const MIN_WORD_LENGTH = 3; // Minimum word length to include in template code
+const MAX_WORDS_IN_CODE = 4; // Maximum number of words to use from subject
+const MAX_TEMPLATE_CODE_LENGTH = 50; // Maximum length for generated template code
+const UUID_SUFFIX_LENGTH = 8; // Length of UUID suffix for uniqueness
+
 export async function getTemplates(search?: string): Promise<EmailTemplate[]> {
   try {
     let sql = "SELECT * FROM email_templates";
@@ -134,27 +140,54 @@ export async function findTemplateByContent(
 
 /**
  * Generate a unique template code from subject
+ * Uses meaningful words from subject + UUID suffix for guaranteed uniqueness
  */
 function generateTemplateCode(subject: string): string {
-  // Extract first 3-4 meaningful words from subject, convert to uppercase snake_case
+  // Extract meaningful words from subject, convert to uppercase snake_case
   const words = subject
     .replace(/[^a-zA-Z0-9\s]/g, "") // Remove special characters
     .split(/\s+/)
-    .filter((w) => w.length > 2) // Filter out short words
-    .slice(0, 4)
+    .filter((w) => w.length >= MIN_WORD_LENGTH)
+    .slice(0, MAX_WORDS_IN_CODE)
     .map((w) => w.toUpperCase());
 
   const baseCode = words.length > 0 ? words.join("_") : "CUSTOM";
 
-  // Add timestamp suffix for uniqueness
-  const timestamp = Date.now().toString(36).toUpperCase();
+  // Use crypto UUID suffix for guaranteed uniqueness (handles concurrent requests)
+  const uuidSuffix = crypto.randomUUID().substring(0, UUID_SUFFIX_LENGTH).toUpperCase();
 
-  return `${baseCode}_${timestamp}`;
+  // Combine and enforce max length
+  const fullCode = `${baseCode}_${uuidSuffix}`;
+
+  // Truncate if exceeds max length (keep UUID suffix intact)
+  if (fullCode.length > MAX_TEMPLATE_CODE_LENGTH) {
+    const maxBaseLength = MAX_TEMPLATE_CODE_LENGTH - UUID_SUFFIX_LENGTH - 1; // -1 for underscore
+    return `${baseCode.substring(0, maxBaseLength)}_${uuidSuffix}`;
+  }
+
+  return fullCode;
+}
+
+/**
+ * Validate template input
+ */
+function validateTemplateInput(
+  subject: string,
+  htmlContent: string
+): { valid: boolean; error?: string } {
+  if (!subject || subject.trim().length === 0) {
+    return { valid: false, error: "Subject cannot be empty" };
+  }
+  if (!htmlContent || htmlContent.trim().length === 0) {
+    return { valid: false, error: "HTML content cannot be empty" };
+  }
+  return { valid: true };
 }
 
 /**
  * Save a custom email template (auto-generates template_code)
  * Only saves if no template with same subject + html_content exists
+ * Uses ON CONFLICT to handle race conditions atomically
  */
 export async function saveCustomTemplate(
   subject: string,
@@ -162,8 +195,14 @@ export async function saveCustomTemplate(
   description?: string
 ): Promise<{ success: boolean; templateCode?: string; error?: string; alreadyExists?: boolean }> {
   try {
+    // Validate input
+    const validation = validateTemplateInput(subject, htmlContent);
+    if (!validation.valid) {
+      return { success: false, error: validation.error };
+    }
+
     // Check if template with same content already exists
-    const existing = await findTemplateByContent(subject, htmlContent);
+    const existing = await findTemplateByContent(subject.trim(), htmlContent.trim());
     if (existing) {
       return {
         success: true,
@@ -172,29 +211,41 @@ export async function saveCustomTemplate(
       };
     }
 
-    // Generate unique template code
-    let templateCode = generateTemplateCode(subject);
+    // Generate unique template code with UUID for guaranteed uniqueness
+    const templateCode = generateTemplateCode(subject.trim());
 
-    // Ensure uniqueness by checking if code exists
-    let existingCode = await getTemplateByCode(templateCode);
-    let attempts = 0;
-    while (existingCode && attempts < 5) {
-      templateCode = generateTemplateCode(subject);
-      existingCode = await getTemplateByCode(templateCode);
-      attempts++;
-    }
-
-    if (existingCode) {
-      // Fallback: append random string
-      templateCode = `${templateCode}_${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
-    }
-
-    // Insert the new template
-    await query(
+    // Insert with ON CONFLICT to handle race conditions atomically
+    // If code already exists (race condition), do nothing and return error
+    const result = await query(
       `INSERT INTO email_templates (template_code, subject, html_content, description)
-       VALUES ($1, $2, $3, $4)`,
-      [templateCode, subject, htmlContent, description || "Auto-saved custom template"]
+       VALUES ($1, $2, $3, $4)
+       ON CONFLICT (template_code) DO NOTHING
+       RETURNING template_code`,
+      [templateCode, subject.trim(), htmlContent.trim(), description || "Auto-saved custom template"]
     );
+
+    // If no row returned, there was a conflict (very rare with UUID)
+    if (result.rows.length === 0) {
+      // Retry once with new UUID
+      const retryCode = generateTemplateCode(subject.trim());
+      const retryResult = await query(
+        `INSERT INTO email_templates (template_code, subject, html_content, description)
+         VALUES ($1, $2, $3, $4)
+         RETURNING template_code`,
+        [retryCode, subject.trim(), htmlContent.trim(), description || "Auto-saved custom template"]
+      );
+
+      if (retryResult.rows.length === 0) {
+        return { success: false, error: "Failed to generate unique template code" };
+      }
+
+      revalidatePath("/dashboard/templates");
+      return {
+        success: true,
+        templateCode: retryCode,
+        alreadyExists: false,
+      };
+    }
 
     revalidatePath("/dashboard/templates");
 
