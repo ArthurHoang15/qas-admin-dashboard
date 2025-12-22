@@ -12,7 +12,7 @@ const poolConfig = { connectionString: databaseUrl, ssl: { rejectUnauthorized: f
 
 const pool = new Pool(poolConfig);
 
-type QueryParam = string | number | boolean | null | undefined;
+type QueryParam = string | number | boolean | null | undefined | string[] | number[];
 declare global {
   var postgres: Pool | undefined;
 }

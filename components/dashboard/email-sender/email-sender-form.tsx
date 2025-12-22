@@ -14,6 +14,7 @@ import { EmailPreviewPanel } from "./email-preview-panel";
 import { InfoBox } from "./info-box";
 import { SendResultModal } from "./send-result-modal";
 import { SaveTemplateModal } from "./save-template-modal";
+import { CSVRecipientUpload } from "./csv-recipient-upload";
 import type { EmailTemplate, EmailFormData, BatchEmailResult } from "@/lib/types";
 
 interface EmailSenderFormProps {
@@ -92,6 +93,15 @@ export function EmailSenderForm({ templates }: EmailSenderFormProps) {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     setError(null);
+  };
+
+  // Handle CSV recipients loaded
+  const handleCSVRecipientsLoaded = (emails: string[], names: string[]) => {
+    setFormData((prev) => ({
+      ...prev,
+      to: emails.join(", "),
+      names: names.join(", "),
+    }));
   };
 
   const handleSubmit = () => {
@@ -248,6 +258,9 @@ export function EmailSenderForm({ templates }: EmailSenderFormProps) {
               />
               <p className="text-xs text-muted-foreground">{t("fromHint")}</p>
             </div>
+
+            {/* CSV Upload */}
+            <CSVRecipientUpload onRecipientsLoaded={handleCSVRecipientsLoaded} />
 
             {/* To */}
             <div className="space-y-1.5">
