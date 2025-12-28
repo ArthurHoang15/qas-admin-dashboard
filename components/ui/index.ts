@@ -6,3 +6,4 @@ export { Modal } from "./modal";
 export { ConfirmDialog } from "./confirm-dialog";
 export { SearchInput } from "./search-input";
 export { Badge } from "./badge";
+export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "./tooltip";
