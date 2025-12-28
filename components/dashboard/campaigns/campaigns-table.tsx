@@ -6,6 +6,12 @@ import { Eye, Trash2, Play, Pause, Copy, Archive } from "lucide-react";
 import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { CampaignWithRates } from "@/lib/types";
 import { CampaignStatusBadge } from "./campaign-status-badge";
 import {
@@ -226,97 +232,134 @@ export function CampaignsTable({ campaigns, onCampaignUpdated }: CampaignsTableP
                   {formatDate(campaign.created_at)}
                 </td>
                 <td className="px-4 py-3 text-sm text-right whitespace-nowrap">
-                  <div className="flex justify-end gap-1">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 w-8 p-0"
-                      aria-label={t("viewDetails")}
-                      onClick={() => handleViewDetails(campaign)}
-                    >
-                      <Eye className="h-4 w-4" />
-                    </Button>
+                  <TooltipProvider delayDuration={300}>
+                    <div className="flex justify-end gap-1">
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0"
+                            aria-label={t("viewDetails")}
+                            onClick={() => handleViewDetails(campaign)}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>{t("viewDetails")}</TooltipContent>
+                      </Tooltip>
 
-                    {/* Start/Resume/Pause based on status */}
-                    {campaign.status === 'draft' && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 w-8 p-0 text-green-600 hover:text-green-700"
-                        aria-label={t("start")}
-                        onClick={() => handleStart(campaign)}
-                        disabled={actionLoading === campaign.id}
-                      >
-                        <Play className="h-4 w-4" />
-                      </Button>
-                    )}
+                      {/* Start/Resume/Pause based on status */}
+                      {campaign.status === 'draft' && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 w-8 p-0 text-green-600 hover:text-green-700"
+                              aria-label={t("start")}
+                              onClick={() => handleStart(campaign)}
+                              disabled={actionLoading === campaign.id}
+                            >
+                              <Play className="h-4 w-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>{t("start")}</TooltipContent>
+                        </Tooltip>
+                      )}
 
-                    {campaign.status === 'paused' && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 w-8 p-0 text-green-600 hover:text-green-700"
-                        aria-label={t("resume")}
-                        onClick={() => handleResume(campaign)}
-                        disabled={actionLoading === campaign.id}
-                      >
-                        <Play className="h-4 w-4" />
-                      </Button>
-                    )}
+                      {campaign.status === 'paused' && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 w-8 p-0 text-green-600 hover:text-green-700"
+                              aria-label={t("resume")}
+                              onClick={() => handleResume(campaign)}
+                              disabled={actionLoading === campaign.id}
+                            >
+                              <Play className="h-4 w-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>{t("resume")}</TooltipContent>
+                        </Tooltip>
+                      )}
 
-                    {campaign.status === 'sending' && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 w-8 p-0 text-yellow-600 hover:text-yellow-700"
-                        aria-label={t("pause")}
-                        onClick={() => handlePause(campaign)}
-                        disabled={actionLoading === campaign.id}
-                      >
-                        <Pause className="h-4 w-4" />
-                      </Button>
-                    )}
+                      {campaign.status === 'sending' && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 w-8 p-0 text-yellow-600 hover:text-yellow-700"
+                              aria-label={t("pause")}
+                              onClick={() => handlePause(campaign)}
+                              disabled={actionLoading === campaign.id}
+                            >
+                              <Pause className="h-4 w-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>{t("pause")}</TooltipContent>
+                        </Tooltip>
+                      )}
 
-                    {/* Duplicate */}
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 w-8 p-0"
-                      aria-label={t("duplicate")}
-                      onClick={() => handleDuplicate(campaign)}
-                      disabled={actionLoading === campaign.id}
-                    >
-                      <Copy className="h-4 w-4" />
-                    </Button>
+                      {/* Duplicate */}
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0"
+                            aria-label={t("duplicate")}
+                            onClick={() => handleDuplicate(campaign)}
+                            disabled={actionLoading === campaign.id}
+                          >
+                            <Copy className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>{t("duplicate")}</TooltipContent>
+                      </Tooltip>
 
-                    {/* Archive */}
-                    {['completed', 'paused'].includes(campaign.status) && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 w-8 p-0"
-                        aria-label={t("archive")}
-                        onClick={() => handleArchive(campaign)}
-                        disabled={actionLoading === campaign.id}
-                      >
-                        <Archive className="h-4 w-4" />
-                      </Button>
-                    )}
+                      {/* Archive */}
+                      {['completed', 'paused'].includes(campaign.status) && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 w-8 p-0"
+                              aria-label={t("archive")}
+                              onClick={() => handleArchive(campaign)}
+                              disabled={actionLoading === campaign.id}
+                            >
+                              <Archive className="h-4 w-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>{t("archive")}</TooltipContent>
+                        </Tooltip>
+                      )}
 
-                    {/* Delete (only draft) */}
-                    {campaign.status === 'draft' && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 w-8 p-0 text-destructive hover:text-destructive"
-                        aria-label={t("delete")}
-                        onClick={() => handleDelete(campaign)}
-                        disabled={actionLoading === campaign.id}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </div>
+                      {/* Delete (only draft) */}
+                      {campaign.status === 'draft' && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                              aria-label={t("delete")}
+                              onClick={() => handleDelete(campaign)}
+                              disabled={actionLoading === campaign.id}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>{t("delete")}</TooltipContent>
+                        </Tooltip>
+                      )}
+                    </div>
+                  </TooltipProvider>
                 </td>
               </tr>
             ))}
