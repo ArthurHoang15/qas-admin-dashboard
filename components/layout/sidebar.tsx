@@ -2,31 +2,41 @@
 
 import { useTranslations } from "next-intl";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
-import { LayoutDashboard, Mail, Users, LogOut, Send, BookUser, Megaphone } from "lucide-react";
+import { LayoutDashboard, Mail, Users, LogOut, Send, BookUser, Megaphone, Settings, UserCircle } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import { useTransition } from "react";
+import type { DashboardPage } from "@/lib/types";
 
 interface NavItem {
   href: string;
   labelKey: string;
   icon: React.ElementType;
+  page: DashboardPage;
 }
 
-const navItems: NavItem[] = [
-  { href: "/dashboard", labelKey: "dashboard", icon: LayoutDashboard },
-  { href: "/dashboard/templates", labelKey: "templates", icon: Mail },
-  { href: "/dashboard/email-sender", labelKey: "emailSender", icon: Send },
-  { href: "/dashboard/registrations", labelKey: "registrations", icon: Users },
-  { href: "/dashboard/contacts", labelKey: "contacts", icon: BookUser },
-  { href: "/dashboard/campaigns", labelKey: "campaigns", icon: Megaphone },
+const allNavItems: NavItem[] = [
+  { href: "/dashboard", labelKey: "dashboard", icon: LayoutDashboard, page: "dashboard" },
+  { href: "/dashboard/templates", labelKey: "templates", icon: Mail, page: "templates" },
+  { href: "/dashboard/email-sender", labelKey: "emailSender", icon: Send, page: "email-sender" },
+  { href: "/dashboard/registrations", labelKey: "registrations", icon: Users, page: "registrations" },
+  { href: "/dashboard/contacts", labelKey: "contacts", icon: BookUser, page: "contacts" },
+  { href: "/dashboard/campaigns", labelKey: "campaigns", icon: Megaphone, page: "campaigns" },
+  { href: "/dashboard/admin/users", labelKey: "userManagement", icon: Settings, page: "user-management" },
 ];
 
-export default function Sidebar() {
+interface SidebarProps {
+  allowedPages: DashboardPage[];
+}
+
+export default function Sidebar({ allowedPages }: SidebarProps) {
   const pathname = usePathname();
   const t = useTranslations("sidebar");
   const tHeader = useTranslations("header");
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+
+  // Filter nav items based on allowed pages
+  const navItems = allNavItems.filter(item => allowedPages.includes(item.page));
 
   const handleLogout = async () => {
     const supabase = createClient();
@@ -80,8 +90,15 @@ export default function Sidebar() {
           })}
         </nav>
 
-        {/* Logout Button */}
-        <div className="border-t border-border p-3">
+        {/* Profile & Logout */}
+        <div className="border-t border-border p-3 space-y-1">
+          <Link
+            href="/account/profile"
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          >
+            <UserCircle className="h-5 w-5" />
+            {tHeader("profile")}
+          </Link>
           <button
             onClick={handleLogout}
             disabled={isPending}

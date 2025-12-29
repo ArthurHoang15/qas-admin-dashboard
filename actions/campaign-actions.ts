@@ -345,7 +345,13 @@ export async function getAudiencePreview(
     );
 
     // Get sample (first 10)
-    const sampleResult = await query(
+    const sampleResult = await query<{
+      id: string;
+      email: string;
+      first_name: string | null;
+      last_name: string | null;
+      tags: string[];
+    }>(
       `SELECT id, email, first_name, last_name, tags
        FROM marketing_contacts ${whereClause}
        LIMIT 10`,
@@ -541,7 +547,7 @@ export async function getCampaignRecipients(
     const safeSortOrder = sortOrder === "asc" ? "ASC" : "DESC";
 
     // Get paginated data with contact info
-    const dataResult = await query(
+    const dataResult = await query<CampaignLog & { email: string; first_name: string | null; last_name: string | null }>(
       `SELECT l.*, c.email, c.first_name, c.last_name
        FROM marketing_campaign_logs l
        JOIN marketing_contacts c ON l.contact_id = c.id
@@ -668,7 +674,7 @@ export async function completeCampaign(id: string): Promise<{ success: boolean; 
  */
 export async function getCampaignOptions(): Promise<Array<{ id: string; name: string; status: CampaignStatus }>> {
   try {
-    const result = await query(
+    const result = await query<{ id: string; name: string; status: CampaignStatus }>(
       `SELECT id, name, status FROM marketing_campaigns ORDER BY created_at DESC`
     );
     return result.rows;

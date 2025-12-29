@@ -4,3 +4,4 @@ export * from "./email-sender";
 export * from "./campaign";
 export * from "./contact";
 export * from "./campaign-log";
+export * from "./rbac";

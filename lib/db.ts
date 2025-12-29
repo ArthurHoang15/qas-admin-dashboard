@@ -1,4 +1,4 @@
-import { Pool, QueryResult } from "pg";
+import { Pool, QueryResult, QueryResultRow } from "pg";
 
 const databaseUrl = process.env.DATABASE_URL;
 
@@ -8,19 +8,34 @@ if (!databaseUrl) {
   );
 }
 
-const poolConfig = { connectionString: databaseUrl, ssl: { rejectUnauthorized: false } };
-
-const pool = new Pool(poolConfig);
+const poolConfig = {
+  connectionString: databaseUrl,
+  ssl: { rejectUnauthorized: false },
+  max: 10,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 10000,
+};
 
 type QueryParam = string | number | boolean | null | undefined | string[] | number[];
+
 declare global {
   var postgres: Pool | undefined;
 }
 
-if (!globalThis.postgres) {
-  globalThis.postgres = new Pool(poolConfig);
+function getPool(): Pool {
+  if (!globalThis.postgres) {
+    globalThis.postgres = new Pool(poolConfig);
+    globalThis.postgres.on('error', (err) => {
+      console.error('Unexpected error on idle client', err);
+    });
+  }
+  return globalThis.postgres;
 }
 
-export const query = async (text: string, params: QueryParam[] = []): Promise<QueryResult> => {
+export const query = async <T extends QueryResultRow = QueryResultRow>(
+  text: string,
+  params: QueryParam[] = []
+): Promise<QueryResult<T>> => {
+  const pool = getPool();
   return pool.query(text, params);
 };

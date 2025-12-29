@@ -1,17 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { Lock, Mail, Eye, EyeOff } from "lucide-react";
+import { UserPlus, Mail, Eye, EyeOff, User } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { login } from "./actions";
+import { signup } from "./actions";
 import { GoogleOAuthButton } from "@/components/auth/google-oauth-button";
 
-interface LoginFormProps {
+interface SignupFormProps {
   message?: string;
+  messageType?: "error" | "success";
 }
 
-export default function LoginForm({ message }: LoginFormProps) {
+export default function SignupForm({ message, messageType = "error" }: SignupFormProps) {
   const [showPassword, setShowPassword] = useState(false);
   const t = useTranslations("auth");
 
@@ -19,13 +20,13 @@ export default function LoginForm({ message }: LoginFormProps) {
     <div className="w-full max-w-md bg-white rounded-2xl border border-slate-100 shadow-xl overflow-hidden">
       <div className="p-8 pb-0 text-center">
         <div className="mx-auto w-12 h-12 bg-slate-900 rounded-xl flex items-center justify-center mb-4 shadow-lg shadow-slate-900/20">
-          <Lock className="w-6 h-6 text-white" />
+          <UserPlus className="w-6 h-6 text-white" />
         </div>
         <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-          {t("welcomeBack")}
+          {t("createAccount")}
         </h1>
         <p className="text-sm text-slate-500 mt-2">
-          {t("signInDescription")}
+          {t("signUpDescription")}
         </p>
       </div>
 
@@ -48,6 +49,22 @@ export default function LoginForm({ message }: LoginFormProps) {
         {/* Email/Password Form */}
         <form className="space-y-4">
           <div className="space-y-2">
+            <label className="text-sm font-medium text-slate-700" htmlFor="fullName">
+              {t("fullName")}
+            </label>
+            <div className="relative">
+              <User className="absolute left-3 top-2.5 h-5 w-5 text-slate-400" />
+              <input
+                id="fullName"
+                name="fullName"
+                type="text"
+                placeholder={t("fullNamePlaceholder")}
+                className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
             <label className="text-sm font-medium text-slate-700" htmlFor="email">
               {t("email")}
             </label>
@@ -65,17 +82,9 @@ export default function LoginForm({ message }: LoginFormProps) {
           </div>
 
           <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <label className="text-sm font-medium text-slate-700" htmlFor="password">
-                {t("password")}
-              </label>
-              <Link
-                href="/login/forgot-password"
-                className="text-sm text-slate-500 hover:text-slate-900 transition-colors"
-              >
-                {t("forgotPassword.link")}
-              </Link>
-            </div>
+            <label className="text-sm font-medium text-slate-700" htmlFor="password">
+              {t("password")}
+            </label>
             <div className="relative">
               <input
                 id="password"
@@ -83,6 +92,7 @@ export default function LoginForm({ message }: LoginFormProps) {
                 type={showPassword ? "text" : "password"}
                 placeholder="********"
                 required
+                minLength={6}
                 className="w-full pl-4 pr-10 py-2 border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all"
               />
               <button
@@ -96,26 +106,30 @@ export default function LoginForm({ message }: LoginFormProps) {
           </div>
 
           {message && (
-            <div className="p-3 bg-red-50 border border-red-100 rounded-lg flex items-center gap-2 text-sm text-red-600 animate-in fade-in slide-in-from-top-1">
-              <span>Warning</span>
+            <div className={`p-3 rounded-lg flex items-center gap-2 text-sm animate-in fade-in slide-in-from-top-1 ${
+              messageType === "success"
+                ? "bg-green-50 border border-green-100 text-green-600"
+                : "bg-red-50 border border-red-100 text-red-600"
+            }`}>
+              <span>{messageType === "success" ? "✓" : "⚠"}</span>
               <p>{message}</p>
             </div>
           )}
 
           <button
-            formAction={login}
+            formAction={signup}
             className="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-2.5 rounded-lg transition-all duration-200 shadow-lg shadow-slate-900/20 active:scale-[0.98]"
           >
-            {t("signIn")}
+            {t("signUp")}
           </button>
         </form>
       </div>
 
       <div className="px-8 py-4 bg-slate-50 border-t border-slate-100 text-center">
         <p className="text-sm text-slate-600">
-          {t("dontHaveAccount")}{" "}
-          <Link href="/signup" className="text-slate-900 font-semibold hover:underline">
-            {t("signUp")}
+          {t("alreadyHaveAccount")}{" "}
+          <Link href="/login" className="text-slate-900 font-semibold hover:underline">
+            {t("signIn")}
           </Link>
         </p>
       </div>
