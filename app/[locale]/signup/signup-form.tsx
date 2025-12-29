@@ -9,9 +9,10 @@ import { GoogleOAuthButton } from "@/components/auth/google-oauth-button";
 
 interface SignupFormProps {
   message?: string;
+  messageType?: "error" | "success";
 }
 
-export default function SignupForm({ message }: SignupFormProps) {
+export default function SignupForm({ message, messageType = "error" }: SignupFormProps) {
   const [showPassword, setShowPassword] = useState(false);
   const t = useTranslations("auth");
 
@@ -105,8 +106,12 @@ export default function SignupForm({ message }: SignupFormProps) {
           </div>
 
           {message && (
-            <div className="p-3 bg-red-50 border border-red-100 rounded-lg flex items-center gap-2 text-sm text-red-600 animate-in fade-in slide-in-from-top-1">
-              <span>Warning</span>
+            <div className={`p-3 rounded-lg flex items-center gap-2 text-sm animate-in fade-in slide-in-from-top-1 ${
+              messageType === "success"
+                ? "bg-green-50 border border-green-100 text-green-600"
+                : "bg-red-50 border border-red-100 text-red-600"
+            }`}>
+              <span>{messageType === "success" ? "✓" : "⚠"}</span>
               <p>{message}</p>
             </div>
           )}

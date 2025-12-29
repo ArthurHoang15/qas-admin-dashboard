@@ -22,7 +22,7 @@ export async function signup(formData: FormData) {
     return redirect(`/signup?message=${errorMessage}`);
   }
 
-  // Sign up with Supabase Auth (disable email confirmation for now)
+  // Sign up with Supabase Auth
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
@@ -30,7 +30,6 @@ export async function signup(formData: FormData) {
       data: {
         full_name: fullName || null,
       },
-      emailRedirectTo: undefined, // Disable email confirmation redirect
     },
   });
 
@@ -40,12 +39,18 @@ export async function signup(formData: FormData) {
     return redirect(`/signup?message=${errorMessage}`);
   }
 
-  // Manually create app_user record (in case trigger fails or doesn't exist)
-  if (data.user) {
-    try {
-      // Determine role - super_admin for main admin email, null for others
-      const role = email === process.env.ADMIN_EMAIL ? 'super_admin' : null;
+  // Check if email already exists (identities will be empty)
+  if (data.user?.identities?.length === 0) {
+    const errorMessage = encodeURIComponent("This email is already registered. Please login instead.");
+    return redirect(`/signup?message=${errorMessage}`);
+  }
 
+  // Check if email confirmation is required
+  if (data.user && !data.session) {
+    // User created but not logged in = email confirmation required
+    // Still create app_user record for when they confirm
+    try {
+      const role = email === process.env.ADMIN_EMAIL ? 'super_admin' : null;
       await query(
         `INSERT INTO app_users (auth_user_id, email, full_name, role, is_active)
          VALUES ($1, $2, $3, $4, true)
@@ -54,12 +59,31 @@ export async function signup(formData: FormData) {
       );
     } catch (dbError) {
       console.error("Error creating app_user:", dbError);
-      // Don't fail signup if app_user creation fails - trigger might handle it
     }
+
+    const successMessage = encodeURIComponent("Please check your email to confirm your account.");
+    return redirect(`/signup?message=${successMessage}&type=success`);
   }
 
+  // User is logged in immediately (email confirmation disabled in Supabase)
+  if (data.user && data.session) {
+    try {
+      const role = email === process.env.ADMIN_EMAIL ? 'super_admin' : null;
+      await query(
+        `INSERT INTO app_users (auth_user_id, email, full_name, role, is_active)
+         VALUES ($1, $2, $3, $4, true)
+         ON CONFLICT (auth_user_id) DO NOTHING`,
+        [data.user.id, email, fullName || null, role]
+      );
+    } catch (dbError) {
+      console.error("Error creating app_user:", dbError);
+    }
+
+    revalidatePath("/", "layout");
+    redirect("/dashboard");
+  }
+
+  // Fallback
   revalidatePath("/", "layout");
-  // After signup, user will be redirected based on their role
-  // New users will have role = null and will be redirected to waiting page
   redirect("/dashboard");
 }
