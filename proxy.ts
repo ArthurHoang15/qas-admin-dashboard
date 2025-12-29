@@ -62,7 +62,16 @@ export async function proxy(request: NextRequest) {
 
   // Define public paths that don't need auth
   const isPublicPath = (path: string) => {
-    const publicPaths = ['/login', '/signup', '/auth/callback', '/waiting-for-role', '/waiting-for-privileges'];
+    const publicPaths = [
+      '/login',
+      '/login/forgot-password',
+      '/signup',
+      '/auth/callback',
+      '/waiting-for-role',
+      '/waiting-for-privileges',
+      '/account/reset-password',
+      '/account/set-password',
+    ];
     return publicPaths.some(p =>
       path === p ||
       path === `/${locale}${p}` ||
@@ -172,6 +181,17 @@ export async function proxy(request: NextRequest) {
 
   // If already logged in and trying to access auth pages
   if (isAuthPath && user) {
+    // Allow authenticated users to access account pages (reset-password, profile, set-password)
+    const isAccountPage = pathname.includes('/account/');
+    if (isAccountPage) {
+      // Don't redirect - let them access account pages
+      const finalResponse = intlResponse || response;
+      response.cookies.getAll().forEach((cookie: { name: string; value: string }) => {
+        finalResponse.cookies.set(cookie.name, cookie.value);
+      });
+      return finalResponse;
+    }
+
     // Check if user has a role
     const { data: appUser } = await supabase
       .from('app_users')

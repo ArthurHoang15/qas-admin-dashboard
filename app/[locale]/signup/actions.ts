@@ -41,7 +41,7 @@ export async function signup(formData: FormData) {
 
   // Check if email already exists (identities will be empty)
   if (data.user?.identities?.length === 0) {
-    const errorMessage = encodeURIComponent("This email is already registered. Please login instead.");
+    const errorMessage = encodeURIComponent("This email is already registered with Google. Please login with Google instead.");
     return redirect(`/signup?message=${errorMessage}`);
   }
 

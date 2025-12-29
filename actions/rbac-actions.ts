@@ -2,8 +2,9 @@
 
 import { query } from "@/lib/db";
 import { createClient } from "@/utils/supabase/server";
+import { createAdminClient } from "@/utils/supabase/admin";
 import { revalidatePath } from "next/cache";
-import type { AppUser, UserRole, DashboardPage, RolePermission, ALL_DASHBOARD_PAGES } from "@/lib/types";
+import type { AppUser, UserRole, DashboardPage, RolePermission } from "@/lib/types";
 
 // Helper to verify current user is super_admin
 async function verifySuperAdmin(): Promise<{ isAdmin: boolean; userId: string | null }> {
@@ -220,4 +221,59 @@ export async function getCurrentUserAllowedPages(): Promise<DashboardPage[]> {
   }
 
   return getRolePermissions(currentUser.role);
+}
+
+/**
+ * Delete user permanently (super_admin only)
+ * Deletes from both auth.users and app_users
+ * Cannot delete:
+ * - Main super_admin account (ADMIN_EMAIL)
+ * - Current logged-in user (yourself)
+ */
+export async function deleteUser(userId: string): Promise<{ success: boolean; message: string }> {
+  const { isAdmin, userId: currentUserId } = await verifySuperAdmin();
+  if (!isAdmin) {
+    return { success: false, message: "Unauthorized: Only super_admin can delete users" };
+  }
+
+  // Get user details
+  const userResult = await query<{ email: string; auth_user_id: string }>(
+    `SELECT email, auth_user_id FROM app_users WHERE id = $1`,
+    [userId]
+  );
+
+  const user = userResult.rows[0];
+  if (!user) {
+    return { success: false, message: "User not found" };
+  }
+
+  // Cannot delete main super_admin
+  if (user.email === process.env.ADMIN_EMAIL) {
+    return { success: false, message: "Cannot delete the main super_admin account" };
+  }
+
+  // Cannot delete yourself
+  if (user.auth_user_id === currentUserId) {
+    return { success: false, message: "Cannot delete your own account" };
+  }
+
+  try {
+    // Delete from auth.users using admin client (bypasses RLS)
+    const adminClient = createAdminClient();
+    const { error: authError } = await adminClient.auth.admin.deleteUser(user.auth_user_id);
+
+    if (authError) {
+      console.error("Error deleting from auth.users:", authError);
+      return { success: false, message: `Failed to delete user: ${authError.message}` };
+    }
+
+    // Delete from app_users
+    await query(`DELETE FROM app_users WHERE id = $1`, [userId]);
+
+    revalidatePath("/dashboard/admin/users");
+    return { success: true, message: "User deleted successfully" };
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    return { success: false, message: "Failed to delete user. Please check server logs." };
+  }
 }

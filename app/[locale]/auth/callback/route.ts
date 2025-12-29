@@ -1,15 +1,24 @@
 import { createClient } from "@/utils/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/db";
+import { routing } from "@/i18n/routing";
 
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get("code");
+  const next = requestUrl.searchParams.get("next");
   const origin = requestUrl.origin;
 
   // Extract locale from the URL path
   const pathParts = requestUrl.pathname.split("/");
-  const locale = pathParts[1] || "en";
+  const potentialLocale = pathParts[1];
+  // Check if the first path segment is a valid locale, otherwise use default
+  const locale = routing.locales.includes(potentialLocale as typeof routing.locales[number])
+    ? potentialLocale
+    : routing.defaultLocale;
+
+  // For default locale with 'as-needed' prefix, don't include locale in path
+  const localePath = locale === routing.defaultLocale ? '' : `/${locale}`;
 
   if (code) {
     const supabase = await createClient();
@@ -18,8 +27,13 @@ export async function GET(request: NextRequest) {
     if (error) {
       console.error("OAuth callback error:", error.message);
       return NextResponse.redirect(
-        `${origin}/${locale}/login?message=${encodeURIComponent("Authentication failed. Please try again.")}`
+        `${origin}${localePath}/login?message=${encodeURIComponent("Authentication failed. Please try again.")}`
       );
+    }
+
+    // If there's a next parameter (e.g., for password reset), redirect there
+    if (next) {
+      return NextResponse.redirect(`${origin}${localePath}${next}`);
     }
 
     // Get the authenticated user
@@ -49,5 +63,5 @@ export async function GET(request: NextRequest) {
   }
 
   // URL to redirect to after sign in
-  return NextResponse.redirect(`${origin}/${locale}/dashboard`);
+  return NextResponse.redirect(`${origin}${localePath}/dashboard`);
 }

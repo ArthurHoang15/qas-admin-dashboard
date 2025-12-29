@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
-import { LayoutDashboard, Mail, Users, LogOut, Send, BookUser, Megaphone, Settings } from "lucide-react";
+import { LayoutDashboard, Mail, Users, LogOut, Send, BookUser, Megaphone, Settings, UserCircle } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import { useTransition } from "react";
 import type { DashboardPage } from "@/lib/types";
@@ -90,8 +90,15 @@ export default function Sidebar({ allowedPages }: SidebarProps) {
           })}
         </nav>
 
-        {/* Logout Button */}
-        <div className="border-t border-border p-3">
+        {/* Profile & Logout */}
+        <div className="border-t border-border p-3 space-y-1">
+          <Link
+            href="/account/profile"
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          >
+            <UserCircle className="h-5 w-5" />
+            {tHeader("profile")}
+          </Link>
           <button
             onClick={handleLogout}
             disabled={isPending}

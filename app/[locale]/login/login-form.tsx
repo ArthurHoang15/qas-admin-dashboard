@@ -65,9 +65,17 @@ export default function LoginForm({ message }: LoginFormProps) {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-700" htmlFor="password">
-              {t("password")}
-            </label>
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-medium text-slate-700" htmlFor="password">
+                {t("password")}
+              </label>
+              <Link
+                href="/login/forgot-password"
+                className="text-sm text-slate-500 hover:text-slate-900 transition-colors"
+              >
+                {t("forgotPassword.link")}
+              </Link>
+            </div>
             <div className="relative">
               <input
                 id="password"

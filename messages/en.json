@@ -54,6 +54,54 @@
       "description": "You have been assigned a role but don't have access to any pages yet. Please wait for the super admin to grant you permissions.",
       "autoRefresh": "This page will automatically refresh to check for permission updates.",
       "checkNow": "Check Now"
+    },
+    "forgotPassword": {
+      "title": "Forgot Password",
+      "description": "Enter your email address and we'll send you a link to reset your password.",
+      "link": "Forgot password?",
+      "sendLink": "Send Reset Link",
+      "sending": "Sending...",
+      "backToLogin": "Back to login",
+      "success": "Password reset email sent. Please check your inbox.",
+      "error": "Failed to send reset email. Please try again."
+    },
+    "resetPassword": {
+      "title": "Reset Password",
+      "description": "Enter your new password below.",
+      "newPassword": "New Password",
+      "confirmPassword": "Confirm Password",
+      "submit": "Reset Password",
+      "resetting": "Resetting...",
+      "success": "Password reset successfully. You can now login with your new password.",
+      "passwordMismatch": "Passwords do not match.",
+      "passwordTooShort": "Password must be at least 6 characters.",
+      "verifying": "Verifying...",
+      "error": "Error",
+      "requestNewLink": "Request New Link",
+      "redirecting": "Redirecting to login..."
+    },
+    "setPassword": {
+      "title": "Set Password",
+      "description": "Set a password for your account to enable email/password login.",
+      "newPassword": "New Password",
+      "confirmPassword": "Confirm Password",
+      "submit": "Set Password",
+      "setting": "Setting...",
+      "success": "Password set successfully. You can now login with email and password.",
+      "passwordMismatch": "Passwords do not match.",
+      "passwordTooShort": "Password must be at least 6 characters.",
+      "backToDashboard": "Back to dashboard"
+    },
+    "profile": {
+      "title": "My Profile",
+      "description": "Manage your account settings and password",
+      "passwordStatus": "Password Status",
+      "passwordSet": "Password is set",
+      "noPassword": "No password set (OAuth only)",
+      "changePassword": "Change Password",
+      "updatePassword": "Update Password",
+      "resetViaEmail": "Send password reset email",
+      "resetViaEmailDescription": "Or receive a password reset link via email"
     }
   },
   "admin": {
@@ -89,7 +137,12 @@
       "active": "Active",
       "inactive": "Inactive",
       "activate": "Activate user",
-      "deactivate": "Deactivate user"
+      "deactivate": "Deactivate user",
+      "delete": "Delete",
+      "deleting": "Deleting...",
+      "cancel": "Cancel",
+      "confirmDeleteTitle": "Delete User",
+      "confirmDeleteMessage": "Are you sure you want to permanently delete this user? This action cannot be undone."
     },
     "permissions": {
       "roleTitle": {
@@ -103,7 +156,8 @@
   "header": {
     "logout": "Logout",
     "language": "Language",
-    "back": "Back"
+    "back": "Back",
+    "profile": "Profile"
   },
   "templates": {
     "title": "Email Templates Management",

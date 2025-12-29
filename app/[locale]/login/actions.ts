@@ -17,7 +17,8 @@ export async function login(formData: FormData) {
   });
 
   if (error) {
-    const errorMessage = encodeURIComponent("Invalid email or password. Please try again.");
+    // Provide helpful error message - if user registered with Google, they can't login with password
+    const errorMessage = encodeURIComponent("Invalid email or password. If you registered with Google, please use 'Continue with Google' button.");
     return redirect(`/login?message=${errorMessage}`);
   }
 

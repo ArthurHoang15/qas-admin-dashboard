@@ -41,7 +41,15 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     const lastDayLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
 
     // Single query with FILTER clauses for better performance
-    const result = await query(
+    const result = await query<{
+      total: string;
+      qualified: string;
+      completed: string;
+      this_month: string;
+      last_month: string;
+      qualified_last_month: string;
+      completed_last_month: string;
+    }>(
       `SELECT
         COUNT(*) as total,
         COUNT(*) FILTER (WHERE is_qualified = true) as qualified,
@@ -89,7 +97,7 @@ export async function getRegistrationTrends(
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
 
-    const result = await query(
+    const result = await query<{ date: string; count: string }>(
       `SELECT
         DATE(created_at) as date,
         COUNT(*) as count
@@ -102,7 +110,7 @@ export async function getRegistrationTrends(
 
     // Fill in missing dates with 0
     const dataMap = new Map<string, number>();
-    result.rows.forEach((row: { date: string; count: string }) => {
+    result.rows.forEach((row) => {
       const dateStr = new Date(row.date).toISOString().split("T")[0];
       dataMap.set(dateStr, Number(row.count));
     });
@@ -127,7 +135,7 @@ export async function getRegistrationTrends(
 
 export async function getPriorityDistribution(): Promise<PriorityDistribution[]> {
   try {
-    const result = await query(
+    const result = await query<{ priority_level: number; count: string }>(
       `SELECT
         priority_level,
         COUNT(*) as count
@@ -137,7 +145,7 @@ export async function getPriorityDistribution(): Promise<PriorityDistribution[]>
       ORDER BY priority_level ASC`
     );
 
-    return result.rows.map((row: { priority_level: number; count: string }) => ({
+    return result.rows.map((row) => ({
       name: `P${row.priority_level}`,
       value: Number(row.count),
       color: PRIORITY_COLORS[row.priority_level] || "gray",
@@ -150,7 +158,7 @@ export async function getPriorityDistribution(): Promise<PriorityDistribution[]>
 
 export async function getPoolBreakdown(): Promise<PoolBreakdown[]> {
   try {
-    const result = await query(
+    const result = await query<{ engagement_pool: string; count: string }>(
       `SELECT
         engagement_pool,
         COUNT(*) as count
@@ -160,7 +168,7 @@ export async function getPoolBreakdown(): Promise<PoolBreakdown[]> {
       ORDER BY count DESC`
     );
 
-    return result.rows.map((row: { engagement_pool: string; count: string }) => ({
+    return result.rows.map((row) => ({
       name: normalizePoolName(row.engagement_pool),
       value: Number(row.count),
     }));
@@ -170,11 +178,26 @@ export async function getPoolBreakdown(): Promise<PoolBreakdown[]> {
   }
 }
 
+interface RecentActivityRow {
+  id: number;
+  first_name: string;
+  last_name: string;
+  email: string;
+  is_qualified: boolean;
+  is_completed: boolean;
+  submission_type: string | null;
+  created_at: string;
+  updated_at: string;
+  last_action: string | null;
+  last_email_sent_code: string | null;
+  next_email_date: string | null;
+}
+
 export async function getRecentActivities(
   limit: number = 10
 ): Promise<RecentActivity[]> {
   try {
-    const result = await query(
+    const result = await query<RecentActivityRow>(
       `SELECT
         id,
         first_name,
@@ -194,21 +217,7 @@ export async function getRecentActivities(
       [limit]
     );
 
-    return result.rows.map(
-      (row: {
-        id: number;
-        first_name: string;
-        last_name: string;
-        email: string;
-        is_qualified: boolean;
-        is_completed: boolean;
-        submission_type: string | null;
-        created_at: string;
-        updated_at: string;
-        last_action: string | null;
-        last_email_sent_code: string | null;
-        next_email_date: string | null;
-      }) => {
+    return result.rows.map((row) => {
         let type: "registration" | "qualified" | "completed" = "registration";
 
         if (row.is_completed) {
@@ -240,7 +249,7 @@ export async function getRecentActivities(
 
 export async function getEmailActionStats(): Promise<EmailActionStats[]> {
   try {
-    const result = await query(
+    const result = await query<{ action: string; count: string }>(
       `SELECT
         COALESCE(last_action, 'None') as action,
         COUNT(*) as count
@@ -249,9 +258,9 @@ export async function getEmailActionStats(): Promise<EmailActionStats[]> {
       ORDER BY count DESC`
     );
 
-    const totalCount = result.rows.reduce((sum: number, row: { count: string }) => sum + Number(row.count), 0);
+    const totalCount = result.rows.reduce((sum, row) => sum + Number(row.count), 0);
 
-    return result.rows.map((row: { action: string; count: string }) => ({
+    return result.rows.map((row) => ({
       action: row.action || 'None',
       count: Number(row.count),
       percentage: totalCount > 0 ? Math.round((Number(row.count) / totalCount) * 100) : 0,

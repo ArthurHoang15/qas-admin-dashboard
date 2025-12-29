@@ -6,7 +6,7 @@ import { Users, Shield } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui";
 import { UserTable } from "./user-table";
 import { RolePermissionsPanel } from "./role-permissions-panel";
-import { getAllUsers, getAllRolePermissions } from "@/actions/rbac-actions";
+import { getAllUsers, getAllRolePermissions, getCurrentUser } from "@/actions/rbac-actions";
 import type { AppUser, UserRole, DashboardPage } from "@/lib/types";
 
 type RoleFilter = 'all' | NonNullable<UserRole> | 'pending';
@@ -14,6 +14,7 @@ type RoleFilter = 'all' | NonNullable<UserRole> | 'pending';
 export function UsersContent() {
   const t = useTranslations("admin");
   const [users, setUsers] = useState<AppUser[]>([]);
+  const [currentUserId, setCurrentUserId] = useState<string | undefined>();
   const [rolePermissions, setRolePermissions] = useState<Record<NonNullable<UserRole>, DashboardPage[]>>({
     super_admin: [],
     admin: [],
@@ -30,12 +31,14 @@ export function UsersContent() {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [usersData, permissionsData] = await Promise.all([
+      const [usersData, permissionsData, currentUser] = await Promise.all([
         getAllUsers(),
         getAllRolePermissions(),
+        getCurrentUser(),
       ]);
       setUsers(usersData);
       setRolePermissions(permissionsData);
+      setCurrentUserId(currentUser?.auth_user_id);
     } catch (error) {
       console.error("Error loading data:", error);
     } finally {
@@ -125,7 +128,7 @@ export function UsersContent() {
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
                 </div>
               ) : (
-                <UserTable users={filteredUsers} onUpdate={loadData} />
+                <UserTable users={filteredUsers} onUpdate={loadData} currentUserId={currentUserId} />
               )}
             </CardContent>
           </Card>
