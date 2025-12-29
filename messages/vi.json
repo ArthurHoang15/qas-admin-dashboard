@@ -23,7 +23,82 @@
     "registrations": "Đăng ký",
     "contacts": "Danh bạ",
     "campaigns": "Chiến dịch",
-    "campaignMetrics": "Thống kê chiến dịch"
+    "campaignMetrics": "Thống kê chiến dịch",
+    "userManagement": "Quản lý người dùng"
+  },
+  "auth": {
+    "welcomeBack": "Chào mừng trở lại",
+    "signInDescription": "Đăng nhập để truy cập QAS Dashboard",
+    "signUpDescription": "Tạo tài khoản để bắt đầu",
+    "createAccount": "Tạo tài khoản",
+    "signIn": "Đăng nhập",
+    "signUp": "Đăng ký",
+    "logout": "Đăng xuất",
+    "continueWithGoogle": "Tiếp tục với Google",
+    "orContinueWithEmail": "hoặc tiếp tục với email",
+    "email": "Địa chỉ Email",
+    "emailPlaceholder": "admin@example.com",
+    "password": "Mật khẩu",
+    "fullName": "Họ và tên",
+    "fullNamePlaceholder": "Nguyễn Văn A",
+    "alreadyHaveAccount": "Đã có tài khoản?",
+    "dontHaveAccount": "Chưa có tài khoản?",
+    "waitingForRole": {
+      "title": "Đang chờ phân quyền",
+      "description": "Tài khoản của bạn đã được tạo nhưng chưa được phân role. Vui lòng đợi super admin phân role cho bạn.",
+      "autoRefresh": "Trang này sẽ tự động làm mới để kiểm tra phân quyền.",
+      "checkNow": "Kiểm tra ngay"
+    },
+    "waitingForPrivileges": {
+      "title": "Đang chờ cấp quyền truy cập",
+      "description": "Bạn đã được phân role nhưng chưa có quyền truy cập bất kỳ trang nào. Vui lòng đợi super admin cấp quyền cho bạn.",
+      "autoRefresh": "Trang này sẽ tự động làm mới để kiểm tra quyền truy cập.",
+      "checkNow": "Kiểm tra ngay"
+    }
+  },
+  "admin": {
+    "title": "Quản lý người dùng",
+    "description": "Quản lý người dùng và quyền truy cập của họ",
+    "tabs": {
+      "users": "Người dùng",
+      "permissions": "Quyền theo Role"
+    },
+    "filters": {
+      "all": "Tất cả",
+      "super_admin": "Super Admin",
+      "admin": "Admin",
+      "internal": "Internal",
+      "pending": "Chờ duyệt"
+    },
+    "roles": {
+      "pending": "Chờ duyệt",
+      "super_admin": "Super Admin",
+      "admin": "Admin",
+      "internal": "Internal"
+    },
+    "usersTable": {
+      "title": "Người dùng",
+      "noUsers": "Không tìm thấy người dùng",
+      "columns": {
+        "user": "Người dùng",
+        "role": "Role",
+        "status": "Trạng thái",
+        "createdAt": "Ngày tạo",
+        "actions": "Hành động"
+      },
+      "active": "Hoạt động",
+      "inactive": "Đã khóa",
+      "activate": "Kích hoạt tài khoản",
+      "deactivate": "Khóa tài khoản"
+    },
+    "permissions": {
+      "roleTitle": {
+        "admin": "Quyền Admin",
+        "internal": "Quyền Internal"
+      },
+      "save": "Lưu",
+      "superAdminNote": "Super Admin có quyền truy cập tất cả các trang và không thể thay đổi."
+    }
   },
   "header": {
     "logout": "Đăng xuất",

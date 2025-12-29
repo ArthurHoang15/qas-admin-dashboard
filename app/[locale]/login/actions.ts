@@ -3,6 +3,7 @@
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { query } from "@/lib/db";
 
 export async function login(formData: FormData) {
   const supabase = await createClient();
@@ -10,7 +11,7 @@ export async function login(formData: FormData) {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
 
-  const { error } = await supabase.auth.signInWithPassword({
+  const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,
   });
@@ -18,6 +19,19 @@ export async function login(formData: FormData) {
   if (error) {
     const errorMessage = encodeURIComponent("Invalid email or password. Please try again.");
     return redirect(`/login?message=${errorMessage}`);
+  }
+
+  // Update last_login_at
+  if (data.user) {
+    try {
+      await query(
+        `UPDATE app_users SET last_login_at = NOW() WHERE auth_user_id = $1`,
+        [data.user.id]
+      );
+    } catch (dbError) {
+      console.error("Error updating last_login_at:", dbError);
+      // Don't fail login if update fails
+    }
   }
 
   revalidatePath("/", "layout");

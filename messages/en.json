@@ -23,7 +23,82 @@
     "registrations": "Registrations",
     "contacts": "Contacts",
     "campaigns": "Campaigns",
-    "campaignMetrics": "Campaign Metrics"
+    "campaignMetrics": "Campaign Metrics",
+    "userManagement": "User Management"
+  },
+  "auth": {
+    "welcomeBack": "Welcome Back",
+    "signInDescription": "Sign in to access the QAS Dashboard",
+    "signUpDescription": "Create an account to get started",
+    "createAccount": "Create Account",
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "logout": "Logout",
+    "continueWithGoogle": "Continue with Google",
+    "orContinueWithEmail": "or continue with email",
+    "email": "Email Address",
+    "emailPlaceholder": "admin@example.com",
+    "password": "Password",
+    "fullName": "Full Name",
+    "fullNamePlaceholder": "John Doe",
+    "alreadyHaveAccount": "Already have an account?",
+    "dontHaveAccount": "Don't have an account?",
+    "waitingForRole": {
+      "title": "Awaiting Role Assignment",
+      "description": "Your account has been created but you don't have a role yet. Please wait for the super admin to assign you a role.",
+      "autoRefresh": "This page will automatically refresh to check for role assignment.",
+      "checkNow": "Check Now"
+    },
+    "waitingForPrivileges": {
+      "title": "Awaiting Page Permissions",
+      "description": "You have been assigned a role but don't have access to any pages yet. Please wait for the super admin to grant you permissions.",
+      "autoRefresh": "This page will automatically refresh to check for permission updates.",
+      "checkNow": "Check Now"
+    }
+  },
+  "admin": {
+    "title": "User Management",
+    "description": "Manage users and their permissions",
+    "tabs": {
+      "users": "Users",
+      "permissions": "Role Permissions"
+    },
+    "filters": {
+      "all": "All",
+      "super_admin": "Super Admin",
+      "admin": "Admin",
+      "internal": "Internal",
+      "pending": "Pending"
+    },
+    "roles": {
+      "pending": "Pending",
+      "super_admin": "Super Admin",
+      "admin": "Admin",
+      "internal": "Internal"
+    },
+    "usersTable": {
+      "title": "Users",
+      "noUsers": "No users found",
+      "columns": {
+        "user": "User",
+        "role": "Role",
+        "status": "Status",
+        "createdAt": "Created At",
+        "actions": "Actions"
+      },
+      "active": "Active",
+      "inactive": "Inactive",
+      "activate": "Activate user",
+      "deactivate": "Deactivate user"
+    },
+    "permissions": {
+      "roleTitle": {
+        "admin": "Admin Permissions",
+        "internal": "Internal Permissions"
+      },
+      "save": "Save",
+      "superAdminNote": "Super Admin has access to all pages and cannot be modified."
+    }
   },
   "header": {
     "logout": "Logout",
