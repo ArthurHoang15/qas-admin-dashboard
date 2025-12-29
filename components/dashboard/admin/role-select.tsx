@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { ChevronDown } from "lucide-react";
 import { assignRole } from "@/actions/rbac-actions";
 import type { UserRole } from "@/lib/types";
 
@@ -11,12 +12,15 @@ interface RoleSelectProps {
   onUpdate: () => void;
 }
 
-const ROLES: { value: UserRole; labelKey: string; color: string }[] = [
-  { value: null, labelKey: 'pending', color: 'bg-amber-500/20 text-amber-400' },
-  { value: 'super_admin', labelKey: 'super_admin', color: 'bg-purple-500/20 text-purple-400' },
-  { value: 'admin', labelKey: 'admin', color: 'bg-blue-500/20 text-blue-400' },
-  { value: 'internal', labelKey: 'internal', color: 'bg-green-500/20 text-green-400' },
+// Roles available for assignment (super_admin cannot be assigned via UI)
+const ASSIGNABLE_ROLES: { value: UserRole; labelKey: string; bgColor: string; textColor: string }[] = [
+  { value: null, labelKey: 'pending', bgColor: 'bg-amber-100', textColor: 'text-amber-800' },
+  { value: 'admin', labelKey: 'admin', bgColor: 'bg-blue-100', textColor: 'text-blue-800' },
+  { value: 'internal', labelKey: 'internal', bgColor: 'bg-green-100', textColor: 'text-green-800' },
 ];
+
+// Super admin display style (read-only badge)
+const SUPER_ADMIN_STYLE = { bgColor: 'bg-purple-100', textColor: 'text-purple-800' };
 
 export function RoleSelect({ userId, currentRole, onUpdate }: RoleSelectProps) {
   const t = useTranslations("admin");
@@ -45,35 +49,42 @@ export function RoleSelect({ userId, currentRole, onUpdate }: RoleSelectProps) {
     }
   };
 
-  const currentRoleInfo = ROLES.find(r => r.value === currentRole) || ROLES[0];
-
+  // Super admin badge (read-only)
   if (isProtected) {
     return (
-      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${currentRoleInfo.color}`}>
-        {t(`roles.${currentRoleInfo.labelKey}`)}
+      <span className={`inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold ${SUPER_ADMIN_STYLE.bgColor} ${SUPER_ADMIN_STYLE.textColor}`}>
+        {t('roles.super_admin')}
       </span>
     );
   }
 
+  const currentRoleInfo = ASSIGNABLE_ROLES.find(r => r.value === currentRole) || ASSIGNABLE_ROLES[0];
+
   return (
-    <div className="relative">
+    <div className="relative inline-block">
       <select
         value={currentRole === null ? 'null' : currentRole}
         onChange={handleRoleChange}
         disabled={updating}
-        className={`appearance-none px-3 py-1.5 pr-8 rounded-lg text-sm font-medium border-0 cursor-pointer ${currentRoleInfo.color} disabled:opacity-50`}
+        className={`appearance-none px-3 py-1.5 pr-8 rounded-lg text-xs font-semibold cursor-pointer border border-slate-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50 disabled:cursor-not-allowed ${currentRoleInfo.bgColor} ${currentRoleInfo.textColor}`}
       >
-        {ROLES.map((role) => (
-          <option key={role.labelKey} value={role.value === null ? 'null' : role.value}>
+        {ASSIGNABLE_ROLES.map((role) => (
+          <option
+            key={role.labelKey}
+            value={role.value === null ? 'null' : role.value}
+            className="bg-white text-slate-900"
+          >
             {t(`roles.${role.labelKey}`)}
           </option>
         ))}
       </select>
-      {updating && (
-        <div className="absolute right-2 top-1/2 -translate-y-1/2">
-          <div className="w-4 h-4 animate-spin rounded-full border-2 border-muted border-t-primary" />
-        </div>
-      )}
+      <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
+        {updating ? (
+          <div className="w-4 h-4 animate-spin rounded-full border-2 border-slate-300 border-t-slate-600" />
+        ) : (
+          <ChevronDown className={`w-4 h-4 ${currentRoleInfo.textColor}`} />
+        )}
+      </div>
     </div>
   );
 }

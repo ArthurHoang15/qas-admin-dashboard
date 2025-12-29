@@ -2,6 +2,7 @@
 
 import { createClient } from "@/utils/supabase/client";
 import { useLocale } from "next-intl";
+import { routing } from "@/i18n/routing";
 
 interface GoogleOAuthButtonProps {
   text?: string;
@@ -13,10 +14,13 @@ export function GoogleOAuthButton({ text = "Continue with Google" }: GoogleOAuth
   const handleGoogleLogin = async () => {
     const supabase = createClient();
 
+    // For 'as-needed' locale prefix, default locale doesn't need prefix
+    const localePath = locale === routing.defaultLocale ? '' : `/${locale}`;
+
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/${locale}/auth/callback`,
+        redirectTo: `${window.location.origin}${localePath}/auth/callback`,
       },
     });
 

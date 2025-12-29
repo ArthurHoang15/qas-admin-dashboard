@@ -78,7 +78,10 @@ export async function getUserById(id: string): Promise<AppUser | null> {
 
 /**
  * Assign role to user (super_admin only)
- * Cannot change role of the main super_admin email
+ * Cannot:
+ * - Assign super_admin role to anyone
+ * - Change role of the main super_admin email
+ * - Change role of any existing super_admin
  */
 export async function assignRole(userId: string, role: UserRole): Promise<{ success: boolean; message: string }> {
   const { isAdmin } = await verifySuperAdmin();
@@ -86,15 +89,30 @@ export async function assignRole(userId: string, role: UserRole): Promise<{ succ
     return { success: false, message: "Unauthorized: Only super_admin can assign roles" };
   }
 
-  // Check if trying to change the main super_admin email
-  const userResult = await query<{ email: string }>(
-    `SELECT email FROM app_users WHERE id = $1`,
+  // Cannot assign super_admin role via this function
+  if (role === 'super_admin') {
+    return { success: false, message: "Cannot assign super_admin role" };
+  }
+
+  // Check the target user
+  const userResult = await query<{ email: string; role: UserRole }>(
+    `SELECT email, role FROM app_users WHERE id = $1`,
     [userId]
   );
 
-  const userEmail = userResult.rows[0]?.email;
-  if (userEmail === process.env.ADMIN_EMAIL && role !== 'super_admin') {
+  const user = userResult.rows[0];
+  if (!user) {
+    return { success: false, message: "User not found" };
+  }
+
+  // Cannot change role of main super_admin account
+  if (user.email === process.env.ADMIN_EMAIL) {
     return { success: false, message: "Cannot change role of the main super_admin account" };
+  }
+
+  // Cannot change role of any super_admin
+  if (user.role === 'super_admin') {
+    return { success: false, message: "Cannot change role of a super_admin account" };
   }
 
   await query(
