@@ -11,9 +11,10 @@ if (!databaseUrl) {
 const poolConfig = {
   connectionString: databaseUrl,
   ssl: { rejectUnauthorized: false },
-  max: 10,
+  max: 20, // Increased from 10 for better concurrency
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 10000,
+  statement_timeout: 30000, // 30 second query timeout
 };
 
 type QueryParam = string | number | boolean | null | undefined | string[] | number[];
