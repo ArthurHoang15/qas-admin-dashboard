@@ -15,6 +15,7 @@ import { SendConfirmModal } from "./send-confirm-modal";
 import { EmailPreviewModal } from "./email-preview-modal";
 import { BulkSendBar } from "./bulk-send-bar";
 import { EditStudentModal } from "./edit-student-modal";
+import { StudentDetailsModal } from "./student-details-modal";
 import {
   getOnboardingStudents,
   getOnboardingStats,
@@ -64,6 +65,8 @@ export function OnboardingContent() {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<StudentOnboarding | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [detailsTarget, setDetailsTarget] = useState<StudentOnboarding | null>(null);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
 
   const fetchData = useCallback(async () => {
     setIsLoading(true);
@@ -170,6 +173,11 @@ export function OnboardingContent() {
   const handleEdit = (student: StudentOnboarding) => {
     setEditTarget(student);
     setIsEditModalOpen(true);
+  };
+
+  const handleViewDetails = (student: StudentOnboarding) => {
+    setDetailsTarget(student);
+    setIsDetailsModalOpen(true);
   };
 
   const handleSendEmail = (student: StudentOnboarding) => {
@@ -366,6 +374,7 @@ export function OnboardingContent() {
             onDownloadPdfs={handleDownloadPdfs}
             onSendEmail={handleSendEmail}
             onEdit={handleEdit}
+            onViewDetails={handleViewDetails}
             onDelete={handleDelete}
           />
           <Pagination
@@ -472,6 +481,12 @@ export function OnboardingContent() {
         onClose={() => { setIsEditModalOpen(false); setEditTarget(null); }}
         onSuccess={fetchData}
         student={editTarget}
+      />
+
+      <StudentDetailsModal
+        isOpen={isDetailsModalOpen}
+        onClose={() => { setIsDetailsModalOpen(false); setDetailsTarget(null); }}
+        student={detailsTarget}
       />
     </div>
   );

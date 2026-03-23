@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { MoreHorizontal, Eye, Download, Send, Trash2, Pencil } from "lucide-react";
+import { MoreHorizontal, Eye, Download, Send, Trash2, Pencil, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -17,6 +17,7 @@ interface OnboardingTableProps {
   onDownloadPdfs: (student: StudentOnboarding) => void;
   onSendEmail: (student: StudentOnboarding) => void;
   onEdit: (student: StudentOnboarding) => void;
+  onViewDetails: (student: StudentOnboarding) => void;
   onDelete: (student: StudentOnboarding) => void;
 }
 
@@ -41,6 +42,7 @@ export function OnboardingTable({
   onDownloadPdfs,
   onSendEmail,
   onEdit,
+  onViewDetails,
   onDelete,
 }: OnboardingTableProps) {
   const t = useTranslations("onboarding");
@@ -209,7 +211,7 @@ export function OnboardingTable({
               <Download className="h-4 w-4" />
               {t("downloadPdfs")}
             </button>
-            {currentStudent.status === "pending" && (
+            {currentStudent.status === "pending" ? (
               <>
                 <button
                   className="flex w-full items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-muted transition-colors"
@@ -233,6 +235,14 @@ export function OnboardingTable({
                   {t("delete")}
                 </button>
               </>
+            ) : (
+              <button
+                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-muted transition-colors"
+                onClick={() => { onViewDetails(currentStudent); setOpenDropdown(null); }}
+              >
+                <Info className="h-4 w-4" />
+                {t("viewDetails")}
+              </button>
             )}
           </div>
         </>
