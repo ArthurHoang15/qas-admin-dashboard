@@ -24,7 +24,8 @@
     "contacts": "Danh bạ",
     "campaigns": "Chiến dịch",
     "campaignMetrics": "Thống kê chiến dịch",
-    "userManagement": "Quản lý người dùng"
+    "userManagement": "Quản lý người dùng",
+    "onboarding": "Tiếp nhận học viên"
   },
   "auth": {
     "welcomeBack": "Chào mừng trở lại",
@@ -116,13 +117,15 @@
       "super_admin": "Super Admin",
       "admin": "Admin",
       "internal": "Internal",
-      "pending": "Chờ duyệt"
+      "pending": "Chờ duyệt",
+      "sales": "Sales"
     },
     "roles": {
       "pending": "Chờ duyệt",
       "super_admin": "Super Admin",
       "admin": "Admin",
-      "internal": "Internal"
+      "internal": "Internal",
+      "sales": "Sales"
     },
     "usersTable": {
       "title": "Người dùng",
@@ -147,7 +150,8 @@
     "permissions": {
       "roleTitle": {
         "admin": "Quyền Admin",
-        "internal": "Quyền Internal"
+        "internal": "Quyền Internal",
+        "sales": "Quyền Sales"
       },
       "save": "Lưu",
       "superAdminNote": "Super Admin có quyền truy cập tất cả các trang và không thể thay đổi."
@@ -474,5 +478,77 @@
     "emailsBounced": "email bị trả lại",
     "delivered": "Đã gửi",
     "campaignNotFound": "Không tìm thấy chiến dịch"
+  },
+  "onboarding": {
+    "title": "Tiếp nhận học viên",
+    "totalRecords": "Tổng số",
+    "addStudent": "Thêm học viên",
+    "addStudentBtn": "Thêm học viên",
+    "noStudents": "Không tìm thấy học viên nào",
+    "tryAdjustingFilters": "Hãy thử điều chỉnh bộ lọc",
+    "addStudentsToStart": "Thêm học viên để bắt đầu",
+    "searchPlaceholder": "Tìm theo tên, email hoặc khóa học...",
+    "clearFilters": "Xóa lọc",
+    "statusAll": "Trạng thái - Tất cả",
+    "studentName": "Họ tên học viên",
+    "course": "Khóa học",
+    "email": "Email",
+    "signDate": "Ngày ký",
+    "status": "Trạng thái",
+    "sentAt": "Thời gian gửi",
+    "actions": "Hành động",
+    "previewEmail": "Xem trước email",
+    "downloadPdfs": "Tải PDF",
+    "sendEmail": "Gửi email",
+    "edit": "Sửa",
+    "editStudent": "Sửa học viên",
+    "saveChanges": "Lưu thay đổi",
+    "saving": "Đang lưu...",
+    "updateFailed": "Không thể cập nhật học viên",
+    "delete": "Xóa",
+    "cancel": "Hủy",
+    "creating": "Đang tạo...",
+    "sending": "Đang gửi...",
+    "justNow": "Vừa xong",
+    "statuses": {
+      "pending": "Chờ gửi",
+      "sent": "Đã gửi",
+      "failed": "Thất bại"
+    },
+    "statsTotal": "Tổng",
+    "statsPending": "Chờ gửi",
+    "statsSent": "Đã gửi",
+    "statsFailed": "Thất bại",
+    "sectionPdf": "Thông tin điền vào PDF",
+    "sectionEmail": "Thông tin gửi email",
+    "studentNamePlaceholder": "Nguyễn Văn A",
+    "diagnosticScore": "Điểm Diagnostic",
+    "outputCommitment": "Cam kết đầu ra",
+    "representativeName": "Đại diện QAS",
+    "representativeNamePlaceholder": "Họ tên đại diện QAS Academy",
+    "studentEmail": "Email học viên",
+    "studentEmailPlaceholder": "hocvien@example.com",
+    "parentName": "Tên phụ huynh",
+    "parentNamePlaceholder": "Họ tên phụ huynh",
+    "parentEmail": "Email phụ huynh",
+    "parentEmailPlaceholder": "phuhuynh@example.com",
+    "phone": "Số điện thoại",
+    "phonePlaceholder": "0912345678",
+    "createFailed": "Không thể tạo học viên",
+    "validation": {
+      "nameRequired": "Họ tên học viên là bắt buộc",
+      "courseRequired": "Khóa học là bắt buộc",
+      "emailRequired": "Email học viên là bắt buộc",
+      "signDateRequired": "Ngày ký là bắt buộc",
+      "scoreRange": "Điểm Diagnostic phải từ 0 đến 1600"
+    },
+    "confirmSendTitle": "Xác nhận gửi",
+    "confirmSendMessage": "Gửi email kèm PDF cho học viên này?",
+    "confirmBulkSend": "Gửi email cho {count} học viên?",
+    "confirmDelete": "Bạn có chắc muốn xóa học viên này?",
+    "bulkResult": "{sent} đã gửi, {failed} thất bại",
+    "selectedCount": "Đã chọn {count}",
+    "sendAll": "Gửi tất cả",
+    "loadingPreview": "Đang tải xem trước..."
   }
 }

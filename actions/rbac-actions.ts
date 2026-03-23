@@ -183,6 +183,7 @@ export async function getAllRolePermissions(): Promise<Record<NonNullable<UserRo
     super_admin: [],
     admin: [],
     internal: [],
+    sales: [],
   };
 
   result.rows.forEach(rp => {

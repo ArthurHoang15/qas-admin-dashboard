@@ -24,7 +24,8 @@
     "contacts": "Contacts",
     "campaigns": "Campaigns",
     "campaignMetrics": "Campaign Metrics",
-    "userManagement": "User Management"
+    "userManagement": "User Management",
+    "onboarding": "Student Onboarding"
   },
   "auth": {
     "welcomeBack": "Welcome Back",
@@ -116,13 +117,15 @@
       "super_admin": "Super Admin",
       "admin": "Admin",
       "internal": "Internal",
-      "pending": "Pending"
+      "pending": "Pending",
+      "sales": "Sales"
     },
     "roles": {
       "pending": "Pending",
       "super_admin": "Super Admin",
       "admin": "Admin",
-      "internal": "Internal"
+      "internal": "Internal",
+      "sales": "Sales"
     },
     "usersTable": {
       "title": "Users",
@@ -147,7 +150,8 @@
     "permissions": {
       "roleTitle": {
         "admin": "Admin Permissions",
-        "internal": "Internal Permissions"
+        "internal": "Internal Permissions",
+        "sales": "Sales Permissions"
       },
       "save": "Save",
       "superAdminNote": "Super Admin has access to all pages and cannot be modified."
@@ -474,5 +478,77 @@
     "emailsBounced": "emails bounced",
     "delivered": "Delivered",
     "campaignNotFound": "Campaign not found"
+  },
+  "onboarding": {
+    "title": "Student Onboarding",
+    "totalRecords": "Total Records",
+    "addStudent": "Add Student",
+    "addStudentBtn": "Add Student",
+    "noStudents": "No students found",
+    "tryAdjustingFilters": "Try adjusting your filters",
+    "addStudentsToStart": "Add students to get started",
+    "searchPlaceholder": "Search by name, email, or course...",
+    "clearFilters": "Clear",
+    "statusAll": "Status - All",
+    "studentName": "Student Name",
+    "course": "Course",
+    "email": "Email",
+    "signDate": "Sign Date",
+    "status": "Status",
+    "sentAt": "Sent At",
+    "actions": "Actions",
+    "previewEmail": "Preview Email",
+    "downloadPdfs": "Download PDFs",
+    "sendEmail": "Send Email",
+    "edit": "Edit",
+    "editStudent": "Edit Student",
+    "saveChanges": "Save Changes",
+    "saving": "Saving...",
+    "updateFailed": "Failed to update student",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "creating": "Creating...",
+    "sending": "Sending...",
+    "justNow": "Just now",
+    "statuses": {
+      "pending": "Pending",
+      "sent": "Sent",
+      "failed": "Failed"
+    },
+    "statsTotal": "Total",
+    "statsPending": "Pending",
+    "statsSent": "Sent",
+    "statsFailed": "Failed",
+    "sectionPdf": "PDF Information",
+    "sectionEmail": "Email Information",
+    "studentNamePlaceholder": "Nguyen Van A",
+    "diagnosticScore": "Diagnostic Score",
+    "outputCommitment": "Output Commitment",
+    "representativeName": "QAS Representative",
+    "representativeNamePlaceholder": "QAS representative name",
+    "studentEmail": "Student Email",
+    "studentEmailPlaceholder": "student@example.com",
+    "parentName": "Parent Name",
+    "parentNamePlaceholder": "Parent full name",
+    "parentEmail": "Parent Email",
+    "parentEmailPlaceholder": "parent@example.com",
+    "phone": "Phone",
+    "phonePlaceholder": "0912345678",
+    "createFailed": "Failed to create student",
+    "validation": {
+      "nameRequired": "Student name is required",
+      "courseRequired": "Course is required",
+      "emailRequired": "Student email is required",
+      "signDateRequired": "Sign date is required",
+      "scoreRange": "Diagnostic score must be between 0 and 1600"
+    },
+    "confirmSendTitle": "Confirm Send",
+    "confirmSendMessage": "Send email with PDF attachments to this student?",
+    "confirmBulkSend": "Send emails to {count} students?",
+    "confirmDelete": "Are you sure you want to delete this student?",
+    "bulkResult": "{sent} sent, {failed} failed",
+    "selectedCount": "{count} selected",
+    "sendAll": "Send All",
+    "loadingPreview": "Loading preview..."
   }
 }

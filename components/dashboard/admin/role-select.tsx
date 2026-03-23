@@ -17,6 +17,7 @@ const ASSIGNABLE_ROLES: { value: UserRole; labelKey: string; bgColor: string; te
   { value: null, labelKey: 'pending', bgColor: 'bg-amber-100', textColor: 'text-amber-800' },
   { value: 'admin', labelKey: 'admin', bgColor: 'bg-blue-100', textColor: 'text-blue-800' },
   { value: 'internal', labelKey: 'internal', bgColor: 'bg-green-100', textColor: 'text-green-800' },
+  { value: 'sales', labelKey: 'sales', bgColor: 'bg-orange-100', textColor: 'text-orange-800' },
 ];
 
 // Super admin display style (read-only badge)

@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
-import { LayoutDashboard, Mail, Users, LogOut, Send, BookUser, Megaphone, Settings, UserCircle } from "lucide-react";
+import { LayoutDashboard, Mail, Users, LogOut, Send, BookUser, Megaphone, Settings, UserCircle, GraduationCap } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import { useTransition } from "react";
 import type { DashboardPage } from "@/lib/types";
@@ -21,6 +21,7 @@ const allNavItems: NavItem[] = [
   { href: "/dashboard/registrations", labelKey: "registrations", icon: Users, page: "registrations" },
   { href: "/dashboard/contacts", labelKey: "contacts", icon: BookUser, page: "contacts" },
   { href: "/dashboard/campaigns", labelKey: "campaigns", icon: Megaphone, page: "campaigns" },
+  { href: "/dashboard/onboarding", labelKey: "onboarding", icon: GraduationCap, page: "onboarding" },
   { href: "/dashboard/admin/users", labelKey: "userManagement", icon: Settings, page: "user-management" },
 ];
 
