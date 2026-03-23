@@ -1,5 +1,5 @@
 // User roles
-export type UserRole = 'super_admin' | 'admin' | 'internal' | null;
+export type UserRole = 'super_admin' | 'admin' | 'internal' | 'sales' | null;
 
 // Dashboard pages for access control
 export type DashboardPage =
@@ -9,7 +9,8 @@ export type DashboardPage =
   | 'registrations'
   | 'contacts'
   | 'campaigns'
-  | 'user-management';
+  | 'user-management'
+  | 'onboarding';
 
 // All available pages list
 export const ALL_DASHBOARD_PAGES: DashboardPage[] = [
@@ -20,6 +21,7 @@ export const ALL_DASHBOARD_PAGES: DashboardPage[] = [
   'contacts',
   'campaigns',
   'user-management',
+  'onboarding',
 ];
 
 // App user from database
@@ -55,6 +57,7 @@ export const ROUTE_PAGE_MAP: Record<string, DashboardPage> = {
   '/dashboard/contacts': 'contacts',
   '/dashboard/campaigns': 'campaigns',
   '/dashboard/admin/users': 'user-management',
+  '/dashboard/onboarding': 'onboarding',
 };
 
 // Page display info for UI
@@ -66,6 +69,7 @@ export const PAGE_INFO: Record<DashboardPage, { labelKey: string; icon: string }
   'contacts': { labelKey: 'contacts', icon: 'BookUser' },
   'campaigns': { labelKey: 'campaigns', icon: 'Megaphone' },
   'user-management': { labelKey: 'userManagement', icon: 'Settings' },
+  'onboarding': { labelKey: 'onboarding', icon: 'GraduationCap' },
 };
 
 // Helper function to check if a role has access to a page

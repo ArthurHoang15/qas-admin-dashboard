@@ -19,6 +19,7 @@ export function UsersContent() {
     super_admin: [],
     admin: [],
     internal: [],
+    sales: [],
   });
   const [loading, setLoading] = useState(true);
   const [roleFilter, setRoleFilter] = useState<RoleFilter>('all');
@@ -57,6 +58,7 @@ export function UsersContent() {
     super_admin: users.filter(u => u.role === 'super_admin').length,
     admin: users.filter(u => u.role === 'admin').length,
     internal: users.filter(u => u.role === 'internal').length,
+    sales: users.filter(u => u.role === 'sales').length,
     pending: users.filter(u => u.role === null).length,
   };
 
@@ -99,7 +101,7 @@ export function UsersContent() {
         <>
           {/* Role Filter */}
           <div className="flex gap-2 flex-wrap">
-            {(['all', 'super_admin', 'admin', 'internal', 'pending'] as RoleFilter[]).map((filter) => (
+            {(['all', 'super_admin', 'admin', 'internal', 'sales', 'pending'] as RoleFilter[]).map((filter) => (
               <button
                 key={filter}
                 onClick={() => setRoleFilter(filter)}

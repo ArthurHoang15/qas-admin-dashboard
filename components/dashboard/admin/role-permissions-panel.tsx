@@ -14,7 +14,7 @@ interface RolePermissionsPanelProps {
   loading: boolean;
 }
 
-const ROLES: NonNullable<UserRole>[] = ['admin', 'internal'];
+const ROLES: NonNullable<UserRole>[] = ['admin', 'internal', 'sales'];
 
 const PAGE_LABELS: Record<DashboardPage, string> = {
   'dashboard': 'Dashboard',
@@ -24,6 +24,7 @@ const PAGE_LABELS: Record<DashboardPage, string> = {
   'contacts': 'Contacts',
   'campaigns': 'Campaigns',
   'user-management': 'User Management',
+  'onboarding': 'Onboarding',
 };
 
 export function RolePermissionsPanel({ permissions, onUpdate, loading }: RolePermissionsPanelProps) {
