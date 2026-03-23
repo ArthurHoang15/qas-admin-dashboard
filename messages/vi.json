@@ -549,6 +549,11 @@
     "bulkResult": "{sent} đã gửi, {failed} thất bại",
     "selectedCount": "Đã chọn {count}",
     "sendAll": "Gửi tất cả",
+    "bulkLimitExceeded": "Chỉ có thể gửi tối đa 10 học viên cùng lúc",
+    "skippedTitle": "Một số học viên không thể gửi",
+    "skippedMessage": "Các học viên sau đã được gửi hoặc thất bại và sẽ bị bỏ qua:",
+    "skippedContinue": "Tiếp tục gửi cho {count} học viên còn lại?",
+    "continueSending": "Tiếp tục gửi",
     "loadingPreview": "Đang tải xem trước..."
   }
 }

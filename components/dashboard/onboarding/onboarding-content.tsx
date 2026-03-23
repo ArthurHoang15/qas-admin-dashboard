@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { Plus, GraduationCap, Clock, CheckCircle, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Modal } from "@/components/ui/modal";
 import { Card, CardContent } from "@/components/ui/card";
 import { Pagination } from "@/components/ui/pagination";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -194,12 +195,50 @@ export function OnboardingContent() {
     fetchData();
   };
 
+  // Bulk send: filter out non-pending, warn if any skipped, limit to 10
+  const [skippedStudents, setSkippedStudents] = useState<StudentOnboarding[]>([]);
+  const [isSkippedModalOpen, setIsSkippedModalOpen] = useState(false);
+  const [pendingBulkIds, setPendingBulkIds] = useState<string[]>([]);
+
   const handleBulkSend = () => {
+    const selected = students.data.filter((s) => selectedIds.has(s.id));
+    const pending = selected.filter((s) => s.status === "pending");
+    const skipped = selected.filter((s) => s.status !== "pending");
+
+    if (pending.length === 0) {
+      // All selected are already sent/failed
+      setSkippedStudents(skipped);
+      setIsSkippedModalOpen(true);
+      return;
+    }
+
+    if (pending.length > 10) {
+      alert(t("bulkLimitExceeded"));
+      return;
+    }
+
+    if (skipped.length > 0) {
+      // Some are already sent — show warning, then proceed with pending only
+      setSkippedStudents(skipped);
+      setPendingBulkIds(pending.map((s) => s.id));
+      setIsSkippedModalOpen(true);
+      return;
+    }
+
+    // All good — open confirm modal
+    setPendingBulkIds(pending.map((s) => s.id));
     setIsBulkSendModalOpen(true);
   };
 
+  const handleSkippedConfirm = () => {
+    setIsSkippedModalOpen(false);
+    if (pendingBulkIds.length > 0) {
+      setIsBulkSendModalOpen(true);
+    }
+  };
+
   const handleConfirmBulkSend = async () => {
-    const ids = Array.from(selectedIds);
+    const ids = pendingBulkIds;
     setIsSending(true);
     setSendProgress({ current: 0, total: ids.length });
 
@@ -216,6 +255,7 @@ export function OnboardingContent() {
     setIsSending(false);
     setIsBulkSendModalOpen(false);
     setSelectedIds(new Set());
+    setPendingBulkIds([]);
 
     if (failed > 0) {
       alert(t("bulkResult", { sent, failed }));
@@ -375,12 +415,50 @@ export function OnboardingContent() {
 
       <SendConfirmModal
         isOpen={isBulkSendModalOpen}
-        onClose={() => setIsBulkSendModalOpen(false)}
+        onClose={() => { setIsBulkSendModalOpen(false); setPendingBulkIds([]); }}
         onConfirm={handleConfirmBulkSend}
-        bulkCount={selectedIds.size}
+        bulkCount={pendingBulkIds.length}
         isSending={isSending}
         progress={sendProgress}
       />
+
+      {/* Skipped students warning modal */}
+      <Modal
+        isOpen={isSkippedModalOpen}
+        onClose={() => { setIsSkippedModalOpen(false); setSkippedStudents([]); setPendingBulkIds([]); }}
+        title={t("skippedTitle")}
+        size="md"
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-foreground">{t("skippedMessage")}</p>
+          <div className="rounded-lg border border-border bg-muted/30 p-3 space-y-1 max-h-40 overflow-y-auto">
+            {skippedStudents.map((s) => (
+              <p key={s.id} className="text-sm">
+                <span className="font-medium">{s.student_name}</span>
+                <span className="text-muted-foreground"> — {t(`statuses.${s.status}`)}</span>
+              </p>
+            ))}
+          </div>
+          {pendingBulkIds.length > 0 && (
+            <p className="text-sm text-muted-foreground">
+              {t("skippedContinue", { count: pendingBulkIds.length })}
+            </p>
+          )}
+          <div className="flex justify-end gap-3">
+            <Button
+              variant="secondary"
+              onClick={() => { setIsSkippedModalOpen(false); setSkippedStudents([]); setPendingBulkIds([]); }}
+            >
+              {t("cancel")}
+            </Button>
+            {pendingBulkIds.length > 0 && (
+              <Button variant="primary" onClick={handleSkippedConfirm}>
+                {t("continueSending")}
+              </Button>
+            )}
+          </div>
+        </div>
+      </Modal>
 
       <EmailPreviewModal
         isOpen={isPreviewOpen}

@@ -549,6 +549,11 @@
     "bulkResult": "{sent} sent, {failed} failed",
     "selectedCount": "{count} selected",
     "sendAll": "Send All",
+    "bulkLimitExceeded": "You can only send to up to 10 students at once",
+    "skippedTitle": "Some students cannot be sent",
+    "skippedMessage": "The following students have already been sent or failed and will be skipped:",
+    "skippedContinue": "Continue sending to {count} remaining student(s)?",
+    "continueSending": "Continue Sending",
     "loadingPreview": "Loading preview..."
   }
 }
