@@ -332,10 +332,11 @@ export async function generateOnboardingPdfs(
       new Uint8Array(fontBytes)
     );
 
-    // Fill BaoLuu PDF (2 fields)
+    // Fill BaoLuu PDF (3 fields)
     const baoLuuBytes = await fillPdfTemplate(
       new Uint8Array(baoLuuTemplate),
       {
+        agree_checkbox: "X",
         student_name: student.student_name,
         sign_date: student.sign_date,
       },
