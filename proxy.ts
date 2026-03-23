@@ -80,6 +80,7 @@ export async function proxy(request: NextRequest) {
   };
 
   const isAuthPath = isPublicPath(pathname);
+  const isAccountPage = pathname.includes('/account/');
 
   // Run intl middleware first to handle locale routing
   const intlResponse = intlMiddleware(request);
@@ -110,28 +111,60 @@ export async function proxy(request: NextRequest) {
   // Create Supabase client
   const { supabase, response } = await createMiddlewareClient(request);
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // Helper to merge cookies and return response
+  const mergeCookiesAndReturn = (res: NextResponse) => {
+    response.cookies.getAll().forEach((cookie: { name: string; value: string }) => {
+      res.cookies.set(cookie.name, cookie.value);
+    });
+    return res;
+  };
 
-  // Auth protection logic
-  if (!isAuthPath) {
-    // Not logged in -> redirect to login
-    if (!user) {
-      const loginUrl = new URL(`/${locale}/login`, request.url);
-      return NextResponse.redirect(loginUrl);
-    }
+  // Get authenticated user
+  const { data: { user } } = await supabase.auth.getUser();
 
-    // Fetch app_user from database to check role
-    const { data: appUser, error: appUserError } = await supabase
+  // EARLY RETURN: Unauthenticated user on public path - no DB queries needed
+  if (isAuthPath && !user) {
+    return mergeCookiesAndReturn(intlResponse || response);
+  }
+
+  // EARLY RETURN: Unauthenticated user on protected path - redirect to login
+  if (!isAuthPath && !user) {
+    const loginUrl = new URL(`/${locale}/login`, request.url);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  // EARLY RETURN: Authenticated user on account pages - only need auth, not RBAC
+  if (isAccountPage && user) {
+    return mergeCookiesAndReturn(intlResponse || response);
+  }
+
+  // At this point, user is authenticated and we need user data
+  // Fetch app_users and role_permissions in PARALLEL
+  const [appUserResult, allPermissionsResult] = await Promise.all([
+    supabase
       .from('app_users')
       .select('id, role, is_active')
-      .eq('auth_user_id', user.id)
-      .single();
+      .eq('auth_user_id', user!.id)
+      .single(),
+    supabase
+      .from('role_permissions')
+      .select('role, page')
+  ]);
 
-    // Handle case where app_user doesn't exist yet (trigger might not have fired)
+  const { data: appUser, error: appUserError } = appUserResult;
+  const allPermissions = allPermissionsResult.data || [];
+
+  // Get allowed pages for the user's role
+  const getAllowedPages = (role: NonNullable<UserRole>): DashboardPage[] => {
+    return allPermissions
+      .filter(rp => rp.role === role)
+      .map(rp => rp.page as DashboardPage);
+  };
+
+  // Handle protected routes (!isAuthPath)
+  if (!isAuthPath) {
+    // Handle case where app_user doesn't exist yet
     if (appUserError || !appUser) {
-      // User exists in auth but not in app_users yet - redirect to waiting
       const waitingUrl = new URL(`/${locale}/waiting-for-role`, request.url);
       return NextResponse.redirect(waitingUrl);
     }
@@ -154,19 +187,11 @@ export async function proxy(request: NextRequest) {
 
     // If we can identify the page, check permissions
     if (currentPage) {
-      // Fetch role permissions from database
-      const { data: rolePermissions } = await supabase
-        .from('role_permissions')
-        .select('page')
-        .eq('role', appUser.role as NonNullable<UserRole>);
-
-      const allowedPages = (rolePermissions || []).map(rp => rp.page as DashboardPage);
+      const allowedPages = getAllowedPages(appUser.role as NonNullable<UserRole>);
 
       // Check if user has access to current page
       if (!allowedPages.includes(currentPage)) {
-        // User doesn't have permission for this page
         if (allowedPages.length === 0) {
-          // Has role but no permissions - redirect to waiting-for-privileges page
           const waitingUrl = new URL(`/${locale}/waiting-for-privileges`, request.url);
           return NextResponse.redirect(waitingUrl);
         }
@@ -179,37 +204,13 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  // If already logged in and trying to access auth pages
+  // Handle public routes for authenticated users (isAuthPath && user)
   if (isAuthPath && user) {
-    // Allow authenticated users to access account pages (reset-password, profile, set-password)
-    const isAccountPage = pathname.includes('/account/');
-    if (isAccountPage) {
-      // Don't redirect - let them access account pages
-      const finalResponse = intlResponse || response;
-      response.cookies.getAll().forEach((cookie: { name: string; value: string }) => {
-        finalResponse.cookies.set(cookie.name, cookie.value);
-      });
-      return finalResponse;
-    }
-
-    // Check if user has a role
-    const { data: appUser } = await supabase
-      .from('app_users')
-      .select('role, is_active')
-      .eq('auth_user_id', user.id)
-      .single();
-
     const isWaitingRolePage = pathname.includes('/waiting-for-role');
     const isWaitingPrivilegesPage = pathname.includes('/waiting-for-privileges');
 
     if (appUser?.role && appUser?.is_active) {
-      // Has role - check if has permissions
-      const { data: rolePermissions } = await supabase
-        .from('role_permissions')
-        .select('page')
-        .eq('role', appUser.role as NonNullable<UserRole>);
-
-      const allowedPages = (rolePermissions || []).map(rp => rp.page as DashboardPage);
+      const allowedPages = getAllowedPages(appUser.role as NonNullable<UserRole>);
 
       if (allowedPages.length > 0) {
         // Has permissions -> redirect to first allowed page
@@ -217,28 +218,18 @@ export async function proxy(request: NextRequest) {
         const redirectUrl = new URL(`/${locale}${firstAllowedRoute}`, request.url);
         return NextResponse.redirect(redirectUrl);
       } else if (!isWaitingPrivilegesPage) {
-        // Has role but no permissions and not on waiting-for-privileges -> redirect
+        // Has role but no permissions -> redirect to waiting-for-privileges
         const waitingUrl = new URL(`/${locale}/waiting-for-privileges`, request.url);
         return NextResponse.redirect(waitingUrl);
       }
-      // If on waiting-for-privileges page and no permissions, stay there
     } else if (!isWaitingRolePage && (!appUser?.role || !appUser)) {
-      // No role and not on waiting-for-role page -> redirect to waiting-for-role page
+      // No role -> redirect to waiting-for-role
       const waitingUrl = new URL(`/${locale}/waiting-for-role`, request.url);
       return NextResponse.redirect(waitingUrl);
     }
-    // If on waiting page and conditions met, stay there
   }
 
-  // Merge cookies from both responses
-  const finalResponse = intlResponse || response;
-
-  // Copy Supabase cookies to the final response
-  response.cookies.getAll().forEach((cookie: { name: string; value: string }) => {
-    finalResponse.cookies.set(cookie.name, cookie.value);
-  });
-
-  return finalResponse;
+  return mergeCookiesAndReturn(intlResponse || response);
 }
 
 export const config = {
