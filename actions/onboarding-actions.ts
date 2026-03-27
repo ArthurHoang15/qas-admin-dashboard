@@ -321,6 +321,7 @@ export async function generateOnboardingPdfs(
     const luuYBytes = await fillPdfTemplate(
       new Uint8Array(luuYTemplate),
       {
+        course_name: student.course_name,
         diagnostic_score: diagnosticText,
         output_commitment_yes: student.output_commitment ? "X" : "",
         output_commitment_no: student.output_commitment ? "" : "X",

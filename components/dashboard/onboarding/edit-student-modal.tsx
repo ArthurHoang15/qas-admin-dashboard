@@ -79,8 +79,12 @@ export function EditStudentModal({ isOpen, onClose, onSuccess, student }: EditSt
       return;
     }
 
-    const scoreNum = diagnosticScore ? Number(diagnosticScore) : null;
-    if (diagnosticScore && (isNaN(scoreNum!) || scoreNum! < 0 || scoreNum! > 1600)) {
+    if (!diagnosticScore.trim()) {
+      setError(t("validation.scoreRequired"));
+      return;
+    }
+    const scoreNum = Number(diagnosticScore);
+    if (isNaN(scoreNum) || scoreNum < 0 || scoreNum > 1600) {
       setError(t("validation.scoreRange"));
       return;
     }
@@ -90,7 +94,7 @@ export function EditStudentModal({ isOpen, onClose, onSuccess, student }: EditSt
       const result = await updateOnboardingStudent(student.id, {
         student_name: studentName.trim(),
         course_name: courseName,
-        diagnostic_score: scoreNum,
+        diagnostic_score: scoreNum as number,
         output_commitment: outputCommitment,
         sign_date: signDate.trim(),
         representative_name: "QAS Academy",
@@ -136,7 +140,7 @@ export function EditStudentModal({ isOpen, onClose, onSuccess, student }: EditSt
             <div className="flex items-end gap-2">
               <div className="flex-1">
                 <Input
-                  label={t("diagnosticScore")}
+                  label={t("diagnosticScore") + " *"}
                   type="number"
                   min={0}
                   max={1600}

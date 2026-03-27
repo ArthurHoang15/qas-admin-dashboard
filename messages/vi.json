@@ -545,6 +545,7 @@
       "courseRequired": "Khóa học là bắt buộc",
       "emailRequired": "Email học viên là bắt buộc",
       "signDateRequired": "Ngày ký là bắt buộc",
+      "scoreRequired": "Điểm Diagnostic là bắt buộc",
       "scoreRange": "Điểm Diagnostic phải từ 0 đến 1600"
     },
     "confirmSendTitle": "Xác nhận gửi",
