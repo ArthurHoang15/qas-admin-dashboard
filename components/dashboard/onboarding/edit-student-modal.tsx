@@ -22,6 +22,7 @@ const COURSE_OPTIONS = [
   { value: "PSAT", label: "PSAT" },
   { value: "BSAT", label: "BSAT" },
   { value: "SSAT", label: "SSAT" },
+  { value: "SAT 1-1", label: "SAT 1-1" },
 ];
 
 export function EditStudentModal({ isOpen, onClose, onSuccess, student }: EditStudentModalProps) {
