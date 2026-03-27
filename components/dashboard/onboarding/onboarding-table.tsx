@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { MoreHorizontal, Eye, Download, Send, Trash2, Pencil, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -31,6 +31,7 @@ const COURSE_COLORS: Record<string, string> = {
   PSAT: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
   BSAT: "bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-400",
   SSAT: "bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-400",
+  "SAT 1-1": "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400",
 };
 
 export function OnboardingTable({
@@ -46,7 +47,6 @@ export function OnboardingTable({
   onDelete,
 }: OnboardingTableProps) {
   const t = useTranslations("onboarding");
-  const locale = useLocale();
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [dropdownPos, setDropdownPos] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
   const buttonRefs = useRef<Map<string, HTMLButtonElement>>(new Map());

@@ -40,20 +40,20 @@ interface FieldDef {
 // Page 2: student signing + representative signing
 const LUUY_FIELDS: FieldDef[] = [
   // --- Page 1 ---
-  { name: "diagnostic_score",           page: 0, x: 350, y: 413, width: 28,  height: 14, fontSize: 11 },
+  { name: "diagnostic_score",           page: 0, x: 350, y: 413, width: 28,  height: 15, fontSize: 11 },
   { name: "output_commitment_yes",      page: 0, x: 241, y: 349, width: 6,  height: 6, fontSize: 6 },
   { name: "output_commitment_no",       page: 0, x: 319, y: 349, width: 6,  height: 6, fontSize: 6 },
   // --- Page 2 ---
-  { name: "student_name",               page: 1, x: 115, y: 221, width: 142, height: 14, fontSize: 11 },
-  { name: "sign_date",                  page: 1, x: 115, y: 205,  width: 142, height: 14, fontSize: 11 },
-  { name: "representative_name",        page: 1, x: 368, y: 221, width: 142, height: 14, fontSize: 11 },
-  { name: "representative_sign_date",   page: 1, x: 368, y: 205,  width: 142, height: 14, fontSize: 11 },
+  { name: "student_name",               page: 1, x: 115, y: 223, width: 140, height: 18, fontSize: 11 },
+  { name: "sign_date",                  page: 1, x: 115, y: 205,  width: 142, height: 15, fontSize: 11 },
+  { name: "representative_name",        page: 1, x: 368, y: 223, width: 140, height: 18, fontSize: 11 },
+  { name: "representative_sign_date",   page: 1, x: 368, y: 205,  width: 142, height: 15, fontSize: 11 },
 ];
 
 // QAS_QuyDinh_BaoLuu — 3 fields (all on page 1)
 const BAOLUU_FIELDS: FieldDef[] = [
   { name: "agree_checkbox", page: 0, x: 72, y: 219, width: 6, height: 6, fontSize: 6 },
-  { name: "student_name", page: 0, x: 378, y: 132, width: 162, height: 14, fontSize: 11 },
+  { name: "student_name", page: 0, x: 378, y: 132, width: 162, height: 18, fontSize: 11 },
   { name: "sign_date", page: 0, x: 378, y: 116, width: 162, height: 14, fontSize: 11 },
 ];
 

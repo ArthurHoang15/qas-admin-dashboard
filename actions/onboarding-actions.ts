@@ -435,7 +435,7 @@ export async function sendOnboardingEmail(
 
     // Send via Resend
     const { data, error } = await getResendSalesClient().emails.send({
-      from: `QAS Academy <sale@qascademy.com>`,
+      from: `QAS Academy <sales@qascademy.com>`,
       to: student.student_email,
       cc: cc.length > 0 ? cc : undefined,
       subject,
