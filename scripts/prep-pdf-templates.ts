@@ -33,13 +33,15 @@ interface FieldDef {
   width: number;
   height: number;
   fontSize?: number;
+  bold?: boolean;
 }
 
-// QAS_LuuY_HocVien — 7 fields across 2 pages
-// Page 1: diagnostic_score, output_commitment checkboxes
+// QAS_LuuY_HocVien — 8 fields across 2 pages
+// Page 1: course_name, diagnostic_score, output_commitment checkboxes
 // Page 2: student signing + representative signing
 const LUUY_FIELDS: FieldDef[] = [
   // --- Page 1 ---
+  { name: "course_name",                page: 0, x: 220, y: 374, width: 50,  height: 17, fontSize: 11, bold: true },
   { name: "diagnostic_score",           page: 0, x: 350, y: 413, width: 28,  height: 15, fontSize: 11 },
   { name: "output_commitment_yes",      page: 0, x: 241, y: 349, width: 6,  height: 6, fontSize: 6 },
   { name: "output_commitment_no",       page: 0, x: 319, y: 349, width: 6,  height: 6, fontSize: 6 },
@@ -82,13 +84,22 @@ async function addFieldsToPdf(
 
   // Load Noto Serif — supports Vietnamese diacritics (Georgia does not)
   const fontPath = path.join(FONTS_DIR, "NotoSerif-Regular.ttf");
+  const boldFontPath = path.join(FONTS_DIR, "NotoSerif-Bold.ttf");
   let customFont;
+  let boldFont;
   if (fs.existsSync(fontPath)) {
     const fontBytes = fs.readFileSync(fontPath);
     customFont = await pdfDoc.embedFont(fontBytes);
     console.log("  Font:     NotoSerif-Regular.ttf loaded");
   } else {
     console.log("  Font:     NotoSerif-Regular.ttf not found, using Helvetica");
+  }
+  if (fs.existsSync(boldFontPath)) {
+    const boldFontBytes = fs.readFileSync(boldFontPath);
+    boldFont = await pdfDoc.embedFont(boldFontBytes);
+    console.log("  Font:     NotoSerif-Bold.ttf loaded");
+  } else {
+    console.log("  Font:     NotoSerif-Bold.ttf not found, bold fields will use regular font");
   }
 
   const pages = pdfDoc.getPages();
@@ -119,9 +130,10 @@ async function addFieldsToPdf(
       backgroundColor: rgb(1, 1, 1), // white background (invisible)
     });
 
-    // Set default appearance with font
-    if (customFont) {
-      textField.defaultUpdateAppearances(customFont);
+    // Set default appearance with font (bold font for bold fields, regular otherwise)
+    const fieldFont = field.bold && boldFont ? boldFont : customFont;
+    if (fieldFont) {
+      textField.defaultUpdateAppearances(fieldFont);
     }
     textField.setFontSize(fontSize);
 
