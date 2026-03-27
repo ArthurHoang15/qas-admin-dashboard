@@ -40,7 +40,6 @@ export function AddStudentModal({ isOpen, onClose, onSuccess }: AddStudentModalP
   const [diagnosticScore, setDiagnosticScore] = useState("");
   const [outputCommitment, setOutputCommitment] = useState(true);
   const [signDate, setSignDate] = useState(getTodayString());
-  const [representativeName, setRepresentativeName] = useState("");
   const [studentEmail, setStudentEmail] = useState("");
   const [parentName, setParentName] = useState("");
   const [parentEmail, setParentEmail] = useState("");
@@ -54,7 +53,6 @@ export function AddStudentModal({ isOpen, onClose, onSuccess }: AddStudentModalP
     setDiagnosticScore("");
     setOutputCommitment(true);
     setSignDate(getTodayString());
-    setRepresentativeName("");
     setStudentEmail("");
     setParentName("");
     setParentEmail("");
@@ -102,7 +100,7 @@ export function AddStudentModal({ isOpen, onClose, onSuccess }: AddStudentModalP
         diagnostic_score: scoreNum,
         output_commitment: outputCommitment,
         sign_date: signDate.trim(),
-        representative_name: representativeName.trim() || null,
+        representative_name: "QAS Academy",
         student_email: studentEmail.trim(),
         parent_name: parentName.trim() || null,
         parent_email: parentEmail.trim() || null,
@@ -174,12 +172,14 @@ export function AddStudentModal({ isOpen, onClose, onSuccess }: AddStudentModalP
               onChange={(e) => setSignDate(e.target.value)}
               placeholder="DD/MM/YYYY"
             />
-            <Input
-              label={t("representativeName")}
-              value={representativeName}
-              onChange={(e) => setRepresentativeName(e.target.value)}
-              placeholder={t("representativeNamePlaceholder")}
-            />
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1">
+                {t("representativeName")}
+              </label>
+              <div className="px-3 py-2 text-sm rounded-md border border-input bg-muted text-muted-foreground">
+                QAS Academy
+              </div>
+            </div>
           </div>
         </div>
 
