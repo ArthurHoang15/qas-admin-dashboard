@@ -9,7 +9,11 @@
       "Bash(find D:Anh-QuanAcademy-QASqas-admin-dashboard -maxdepth 3 -type f -name *.ts -path */app/* ! -path */node_modules/*)",
       "Bash(find D:Anh-QuanAcademy-QASqas-admin-dashboard/app -type f \\\\\\(-name *.ts -o -name *.tsx \\\\\\) ! -path */node_modules/*)",
       "Bash(grep -r \"create_table\\\\|CREATE TABLE\" D:Anh-QuanAcademy-QASqas-admin-dashboard --include=*.sql --include=*.ts --include=*.js)",
-      "Bash(bun run:*)"
+      "Bash(bun run:*)",
+      "Bash(ls:*)",
+      "Bash(grep:*)",
+      "Bash(find:*)",
+      "WebFetch(domain:next-intl.dev)"
     ],
     "deny": [],
     "ask": []

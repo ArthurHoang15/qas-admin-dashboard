@@ -16,7 +16,13 @@ const ROUTE_PAGE_MAP: Record<string, DashboardPage> = {
   '/dashboard/contacts': 'contacts',
   '/dashboard/campaigns': 'campaigns',
   '/dashboard/admin/users': 'user-management',
+  '/dashboard/onboarding': 'onboarding',
 };
+
+// Get locale-aware path prefix respecting 'as-needed' locale strategy
+function getLocalePath(locale: string): string {
+  return locale === routing.defaultLocale ? '' : `/${locale}`;
+}
 
 // Get the page from route (handles nested routes)
 function getPageFromRoute(pathname: string): DashboardPage | null {
@@ -119,6 +125,18 @@ export async function proxy(request: NextRequest) {
     return res;
   };
 
+  // Helper to redirect with auth cookies merged and prevent same-URL loops
+  const safeRedirect = (url: URL) => {
+    if (url.pathname === request.nextUrl.pathname && url.search === request.nextUrl.search) {
+      return mergeCookiesAndReturn(NextResponse.next());
+    }
+    const redirectResponse = NextResponse.redirect(url);
+    response.cookies.getAll().forEach((cookie: { name: string; value: string }) => {
+      redirectResponse.cookies.set(cookie.name, cookie.value);
+    });
+    return redirectResponse;
+  };
+
   // Get authenticated user
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -129,8 +147,8 @@ export async function proxy(request: NextRequest) {
 
   // EARLY RETURN: Unauthenticated user on protected path - redirect to login
   if (!isAuthPath && !user) {
-    const loginUrl = new URL(`/${locale}/login`, request.url);
-    return NextResponse.redirect(loginUrl);
+    const loginUrl = new URL(`${getLocalePath(locale)}/login`, request.url);
+    return safeRedirect(loginUrl);
   }
 
   // EARLY RETURN: Authenticated user on account pages - only need auth, not RBAC
@@ -165,21 +183,21 @@ export async function proxy(request: NextRequest) {
   if (!isAuthPath) {
     // Handle case where app_user doesn't exist yet
     if (appUserError || !appUser) {
-      const waitingUrl = new URL(`/${locale}/waiting-for-role`, request.url);
-      return NextResponse.redirect(waitingUrl);
+      const waitingUrl = new URL(`${getLocalePath(locale)}/waiting-for-role`, request.url);
+      return safeRedirect(waitingUrl);
     }
 
     // User is deactivated
     if (!appUser.is_active) {
       await supabase.auth.signOut();
-      const loginUrl = new URL(`/${locale}/login?message=Your account has been deactivated`, request.url);
-      return NextResponse.redirect(loginUrl);
+      const loginUrl = new URL(`${getLocalePath(locale)}/login?message=Your account has been deactivated`, request.url);
+      return safeRedirect(loginUrl);
     }
 
     // User has no role assigned
     if (!appUser.role) {
-      const waitingUrl = new URL(`/${locale}/waiting-for-role`, request.url);
-      return NextResponse.redirect(waitingUrl);
+      const waitingUrl = new URL(`${getLocalePath(locale)}/waiting-for-role`, request.url);
+      return safeRedirect(waitingUrl);
     }
 
     // Get the page for current route
@@ -192,14 +210,14 @@ export async function proxy(request: NextRequest) {
       // Check if user has access to current page
       if (!allowedPages.includes(currentPage)) {
         if (allowedPages.length === 0) {
-          const waitingUrl = new URL(`/${locale}/waiting-for-privileges`, request.url);
-          return NextResponse.redirect(waitingUrl);
+          const waitingUrl = new URL(`${getLocalePath(locale)}/waiting-for-privileges`, request.url);
+          return safeRedirect(waitingUrl);
         }
 
         // Redirect to first allowed page
         const firstAllowedRoute = getRouteForPage(allowedPages[0]);
-        const redirectUrl = new URL(`/${locale}${firstAllowedRoute}`, request.url);
-        return NextResponse.redirect(redirectUrl);
+        const redirectUrl = new URL(`${getLocalePath(locale)}${firstAllowedRoute}`, request.url);
+        return safeRedirect(redirectUrl);
       }
     }
   }
@@ -215,17 +233,17 @@ export async function proxy(request: NextRequest) {
       if (allowedPages.length > 0) {
         // Has permissions -> redirect to first allowed page
         const firstAllowedRoute = getRouteForPage(allowedPages[0]);
-        const redirectUrl = new URL(`/${locale}${firstAllowedRoute}`, request.url);
-        return NextResponse.redirect(redirectUrl);
+        const redirectUrl = new URL(`${getLocalePath(locale)}${firstAllowedRoute}`, request.url);
+        return safeRedirect(redirectUrl);
       } else if (!isWaitingPrivilegesPage) {
         // Has role but no permissions -> redirect to waiting-for-privileges
-        const waitingUrl = new URL(`/${locale}/waiting-for-privileges`, request.url);
-        return NextResponse.redirect(waitingUrl);
+        const waitingUrl = new URL(`${getLocalePath(locale)}/waiting-for-privileges`, request.url);
+        return safeRedirect(waitingUrl);
       }
     } else if (!isWaitingRolePage && (!appUser?.role || !appUser)) {
       // No role -> redirect to waiting-for-role
-      const waitingUrl = new URL(`/${locale}/waiting-for-role`, request.url);
-      return NextResponse.redirect(waitingUrl);
+      const waitingUrl = new URL(`${getLocalePath(locale)}/waiting-for-role`, request.url);
+      return safeRedirect(waitingUrl);
     }
   }
 

@@ -3,7 +3,7 @@
 import { Clock, LogOut, RefreshCw } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { createClient } from "@/utils/supabase/client";
 
 export default function WaitingForRolePage() {
