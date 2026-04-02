@@ -11,12 +11,14 @@ interface OnboardingFiltersProps {
   filters: Filters;
   onFiltersChange: (filters: Filters) => void;
   onClearFilters: () => void;
+  senders: string[];
 }
 
 export function OnboardingFilters({
   filters,
   onFiltersChange,
   onClearFilters,
+  senders,
 }: OnboardingFiltersProps) {
   const t = useTranslations("onboarding");
 
@@ -27,7 +29,12 @@ export function OnboardingFilters({
     { value: "failed", label: t("statuses.failed") },
   ];
 
-  const hasActiveFilters = filters.search || filters.status;
+  const senderOptions = [
+    { value: "", label: t("sentByAll") },
+    ...senders.map((s) => ({ value: s, label: s })),
+  ];
+
+  const hasActiveFilters = filters.search || filters.status || filters.sent_by;
 
   return (
     <div className="flex flex-col lg:flex-row gap-4">
@@ -53,6 +60,19 @@ export function OnboardingFilters({
             onFiltersChange({
               ...filters,
               status: (e.target.value || undefined) as Filters["status"],
+            })
+          }
+        />
+      </div>
+
+      <div className="w-full lg:w-48">
+        <Select
+          options={senderOptions}
+          value={filters.sent_by || ""}
+          onChange={(e) =>
+            onFiltersChange({
+              ...filters,
+              sent_by: e.target.value || undefined,
             })
           }
         />

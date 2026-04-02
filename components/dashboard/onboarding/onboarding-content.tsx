@@ -19,11 +19,13 @@ import { StudentDetailsModal } from "./student-details-modal";
 import {
   getOnboardingStudents,
   getOnboardingStats,
+  getDistinctSenders,
   deleteOnboardingStudent,
   generateOnboardingPdfs,
   sendOnboardingEmail,
   previewOnboardingEmail,
 } from "@/actions/onboarding-actions";
+import { getCurrentUser } from "@/actions/rbac-actions";
 import { removeDiacritics } from "@/lib/diacritics";
 import type {
   StudentOnboarding,
@@ -49,6 +51,8 @@ export function OnboardingContent() {
   const [filters, setFilters] = useState<Filters>({});
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
+  const [senders, setSenders] = useState<string[]>([]);
+  const [currentUserName, setCurrentUserName] = useState<string>("admin");
 
   // Selection state
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -71,12 +75,14 @@ export function OnboardingContent() {
   const fetchData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const [studentsData, statsData] = await Promise.all([
+      const [studentsData, statsData, sendersData] = await Promise.all([
         getOnboardingStudents(filters, { page: currentPage, limit: ITEMS_PER_PAGE }),
         getOnboardingStats(),
+        getDistinctSenders(),
       ]);
       setStudents(studentsData);
       setStats(statsData);
+      setSenders(sendersData);
     } catch (error) {
       console.error("Failed to fetch onboarding data:", error);
     } finally {
@@ -87,6 +93,15 @@ export function OnboardingContent() {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  // Fetch current user name on mount
+  useEffect(() => {
+    getCurrentUser().then((user) => {
+      if (user) {
+        setCurrentUserName(user.full_name || user.email);
+      }
+    });
+  }, []);
 
   // Handlers
   const handleFiltersChange = (newFilters: Filters) => {
@@ -190,7 +205,7 @@ export function OnboardingContent() {
     setIsSending(true);
     setSendProgress({ current: 0, total: 1 });
 
-    const result = await sendOnboardingEmail(sendTarget.id, "admin");
+    const result = await sendOnboardingEmail(sendTarget.id, currentUserName);
     setSendProgress({ current: 1, total: 1 });
 
     if (!result.success) {
@@ -254,7 +269,7 @@ export function OnboardingContent() {
     let failed = 0;
 
     for (let i = 0; i < ids.length; i++) {
-      const result = await sendOnboardingEmail(ids[i], "admin");
+      const result = await sendOnboardingEmail(ids[i], currentUserName);
       if (result.success) sent++;
       else failed++;
       setSendProgress({ current: i + 1, total: ids.length });
@@ -356,6 +371,7 @@ export function OnboardingContent() {
         filters={filters}
         onFiltersChange={handleFiltersChange}
         onClearFilters={handleClearFilters}
+        senders={senders}
       />
 
       {/* Table */}

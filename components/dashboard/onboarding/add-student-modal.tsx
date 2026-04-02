@@ -32,6 +32,26 @@ function getTodayString(): string {
   return `${day}/${month}/${year}`;
 }
 
+function isValidEmail(email: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function isValidVietnamesePhone(phone: string): boolean {
+  return /^(0|\+84)(3|5|7|8|9)[0-9]{8}$/.test(phone);
+}
+
+function isValidDateDDMMYYYY(dateStr: string): boolean {
+  const match = dateStr.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if (!match) return false;
+  const day = parseInt(match[1], 10);
+  const month = parseInt(match[2], 10);
+  const year = parseInt(match[3], 10);
+  if (month < 1 || month > 12) return false;
+  if (day < 1 || day > 31) return false;
+  const date = new Date(year, month - 1, day);
+  return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day;
+}
+
 export function AddStudentModal({ isOpen, onClose, onSuccess }: AddStudentModalProps) {
   const t = useTranslations("onboarding");
 
@@ -44,6 +64,7 @@ export function AddStudentModal({ isOpen, onClose, onSuccess }: AddStudentModalP
   const [parentName, setParentName] = useState("");
   const [parentEmail, setParentEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -57,6 +78,7 @@ export function AddStudentModal({ isOpen, onClose, onSuccess }: AddStudentModalP
     setParentName("");
     setParentEmail("");
     setPhone("");
+    setFieldErrors({});
     setError(null);
   };
 
@@ -65,43 +87,75 @@ export function AddStudentModal({ isOpen, onClose, onSuccess }: AddStudentModalP
     onClose();
   };
 
+  const validate = (): Record<string, string> => {
+    const errors: Record<string, string> = {};
+
+    if (!studentName.trim()) {
+      errors.studentName = t("validation.nameRequired");
+    } else if (studentName.trim().length < 2) {
+      errors.studentName = t("validation.nameMinLength");
+    } else if (/^\d+$/.test(studentName.trim())) {
+      errors.studentName = t("validation.nameNotNumber");
+    }
+
+    if (!courseName) {
+      errors.courseName = t("validation.courseRequired");
+    }
+
+    if (!studentEmail.trim()) {
+      errors.studentEmail = t("validation.emailRequired");
+    } else if (!isValidEmail(studentEmail.trim())) {
+      errors.studentEmail = t("validation.emailFormat");
+    }
+
+    if (!signDate.trim()) {
+      errors.signDate = t("validation.signDateRequired");
+    } else if (!isValidDateDDMMYYYY(signDate.trim())) {
+      errors.signDate = t("validation.signDateFormat");
+    }
+
+    if (!diagnosticScore.trim()) {
+      errors.diagnosticScore = t("validation.scoreRequired");
+    } else {
+      const scoreNum = Number(diagnosticScore);
+      if (isNaN(scoreNum) || scoreNum < 0 || scoreNum > 1600) {
+        errors.diagnosticScore = t("validation.scoreRange");
+      } else if (!Number.isInteger(scoreNum)) {
+        errors.diagnosticScore = t("validation.scoreInteger");
+      }
+    }
+
+    if (parentName.trim() && parentName.trim().length < 2) {
+      errors.parentName = t("validation.nameMinLength");
+    } else if (parentName.trim() && /^\d+$/.test(parentName.trim())) {
+      errors.parentName = t("validation.nameNotNumber");
+    }
+    if (parentEmail.trim() && !isValidEmail(parentEmail.trim())) {
+      errors.parentEmail = t("validation.parentEmailFormat");
+    }
+    if (phone.trim() && !isValidVietnamesePhone(phone.trim())) {
+      errors.phone = t("validation.phoneFormat");
+    }
+
+    return errors;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
-    if (!studentName.trim()) {
-      setError(t("validation.nameRequired"));
-      return;
-    }
-    if (!courseName) {
-      setError(t("validation.courseRequired"));
-      return;
-    }
-    if (!studentEmail.trim()) {
-      setError(t("validation.emailRequired"));
-      return;
-    }
-    if (!signDate.trim()) {
-      setError(t("validation.signDateRequired"));
-      return;
-    }
+    const errors = validate();
+    setFieldErrors(errors);
+    if (Object.keys(errors).length > 0) return;
 
-    if (!diagnosticScore.trim()) {
-      setError(t("validation.scoreRequired"));
-      return;
-    }
     const scoreNum = Number(diagnosticScore);
-    if (isNaN(scoreNum) || scoreNum < 0 || scoreNum > 1600) {
-      setError(t("validation.scoreRange"));
-      return;
-    }
 
     setIsSubmitting(true);
     try {
       const input: CreateOnboardingInput = {
         student_name: studentName.trim(),
         course_name: courseName,
-        diagnostic_score: scoreNum as number,
+        diagnostic_score: scoreNum,
         output_commitment: outputCommitment,
         sign_date: signDate.trim(),
         representative_name: "QAS Academy",
@@ -140,12 +194,14 @@ export function AddStudentModal({ isOpen, onClose, onSuccess }: AddStudentModalP
               value={studentName}
               onChange={(e) => setStudentName(e.target.value)}
               placeholder={t("studentNamePlaceholder")}
+              error={fieldErrors.studentName}
             />
             <Select
               label={t("course") + " *"}
               options={COURSE_OPTIONS}
               value={courseName}
               onChange={(e) => setCourseName(e.target.value)}
+              error={fieldErrors.courseName}
             />
             <div className="flex items-end gap-2">
               <div className="flex-1">
@@ -157,6 +213,7 @@ export function AddStudentModal({ isOpen, onClose, onSuccess }: AddStudentModalP
                   value={diagnosticScore}
                   onChange={(e) => setDiagnosticScore(e.target.value)}
                   placeholder="0"
+                  error={fieldErrors.diagnosticScore}
                 />
               </div>
               <span className="pb-2 text-sm text-muted-foreground">/ 1600</span>
@@ -175,6 +232,7 @@ export function AddStudentModal({ isOpen, onClose, onSuccess }: AddStudentModalP
               value={signDate}
               onChange={(e) => setSignDate(e.target.value)}
               placeholder="DD/MM/YYYY"
+              error={fieldErrors.signDate}
             />
             <div>
               <label className="block text-sm font-medium text-foreground mb-1">
@@ -199,12 +257,14 @@ export function AddStudentModal({ isOpen, onClose, onSuccess }: AddStudentModalP
               value={studentEmail}
               onChange={(e) => setStudentEmail(e.target.value)}
               placeholder={t("studentEmailPlaceholder")}
+              error={fieldErrors.studentEmail}
             />
             <Input
               label={t("parentName")}
               value={parentName}
               onChange={(e) => setParentName(e.target.value)}
               placeholder={t("parentNamePlaceholder")}
+              error={fieldErrors.parentName}
             />
             <Input
               label={t("parentEmail")}
@@ -212,12 +272,14 @@ export function AddStudentModal({ isOpen, onClose, onSuccess }: AddStudentModalP
               value={parentEmail}
               onChange={(e) => setParentEmail(e.target.value)}
               placeholder={t("parentEmailPlaceholder")}
+              error={fieldErrors.parentEmail}
             />
             <Input
               label={t("phone")}
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               placeholder={t("phonePlaceholder")}
+              error={fieldErrors.phone}
             />
           </div>
         </div>

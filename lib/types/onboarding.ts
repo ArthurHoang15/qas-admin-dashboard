@@ -26,6 +26,7 @@ export interface StudentOnboarding {
 export interface OnboardingFilters {
   search?: string;
   status?: OnboardingStatus;
+  sent_by?: string;
 }
 
 export interface OnboardingStats {
