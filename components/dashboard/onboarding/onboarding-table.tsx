@@ -128,6 +128,9 @@ export function OnboardingTable({
                 <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   {t("sentAt")}
                 </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                  {t("sentBy")}
+                </th>
                 <th className="px-4 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   {t("actions")}
                 </th>
@@ -167,6 +170,9 @@ export function OnboardingTable({
                     </td>
                     <td className="px-4 py-3 text-sm text-muted-foreground whitespace-nowrap">
                       {formatRelativeTime(student.sent_at)}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-muted-foreground whitespace-nowrap">
+                      {student.sent_by || "—"}
                     </td>
                     <td className="px-4 py-3 text-sm text-right whitespace-nowrap">
                       <Button

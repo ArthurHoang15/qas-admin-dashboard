@@ -41,6 +41,23 @@ function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
+function isValidVietnamesePhone(phone: string): boolean {
+  return /^(0|\+84)(3|5|7|8|9)[0-9]{8}$/.test(phone);
+}
+
+function isValidDateDDMMYYYY(dateStr: string): boolean {
+  const match = dateStr.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if (!match) return false;
+  const day = parseInt(match[1], 10);
+  const month = parseInt(match[2], 10);
+  const year = parseInt(match[3], 10);
+  if (month < 1 || month > 12) return false;
+  if (day < 1 || day > 31) return false;
+  // Check valid calendar date
+  const date = new Date(year, month - 1, day);
+  return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day;
+}
+
 async function loadFile(relativePath: string): Promise<Buffer> {
   const fullPath = path.join(process.cwd(), relativePath);
   return fs.readFile(fullPath);
@@ -57,7 +74,7 @@ export async function getOnboardingStudents(
   const { page = 1, limit = 10, sortBy = "created_at", sortOrder = "desc" } = pagination;
 
   try {
-    const { search, status } = filters;
+    const { search, status, sent_by } = filters;
     const offset = (page - 1) * limit;
 
     const conditions: string[] = [];
@@ -75,6 +92,12 @@ export async function getOnboardingStudents(
     if (status) {
       conditions.push(`status = $${paramIndex}`);
       params.push(status);
+      paramIndex++;
+    }
+
+    if (sent_by) {
+      conditions.push(`sent_by = $${paramIndex}`);
+      params.push(sent_by);
       paramIndex++;
     }
 
@@ -134,6 +157,18 @@ export async function getOnboardingStats(): Promise<OnboardingStats> {
   }
 }
 
+export async function getDistinctSenders(): Promise<string[]> {
+  try {
+    const result = await query<{ sent_by: string }>(
+      `SELECT DISTINCT sent_by FROM student_onboarding WHERE sent_by IS NOT NULL ORDER BY sent_by`
+    );
+    return result.rows.map((r) => r.sent_by);
+  } catch (error) {
+    console.error("Error fetching distinct senders:", error);
+    return [];
+  }
+}
+
 export async function createOnboardingStudent(
   input: CreateOnboardingInput
 ): Promise<{ success: boolean; error?: string }> {
@@ -141,6 +176,12 @@ export async function createOnboardingStudent(
     // Validation
     if (!input.student_name.trim()) {
       return { success: false, error: "Student name is required" };
+    }
+    if (input.student_name.trim().length < 2) {
+      return { success: false, error: "Name must be at least 2 characters" };
+    }
+    if (/^\d+$/.test(input.student_name.trim())) {
+      return { success: false, error: "Name must not be a number" };
     }
     if (!input.course_name.trim()) {
       return { success: false, error: "Course name is required" };
@@ -151,15 +192,31 @@ export async function createOnboardingStudent(
     if (!input.sign_date.trim()) {
       return { success: false, error: "Sign date is required" };
     }
+    if (!isValidDateDDMMYYYY(input.sign_date.trim())) {
+      return { success: false, error: "Sign date must be a valid date in DD/MM/YYYY format" };
+    }
     if (
       input.diagnostic_score !== null &&
-      input.diagnostic_score !== undefined &&
-      (input.diagnostic_score < 0 || input.diagnostic_score > 1600)
+      input.diagnostic_score !== undefined
     ) {
-      return { success: false, error: "Diagnostic score must be between 0 and 1600" };
+      if (!Number.isInteger(input.diagnostic_score)) {
+        return { success: false, error: "Diagnostic score must be a whole number" };
+      }
+      if (input.diagnostic_score < 0 || input.diagnostic_score > 1600) {
+        return { success: false, error: "Diagnostic score must be between 0 and 1600" };
+      }
     }
     if (input.parent_email && !isValidEmail(input.parent_email)) {
       return { success: false, error: "Invalid parent email format" };
+    }
+    if (input.parent_name && input.parent_name.trim().length < 2) {
+      return { success: false, error: "Parent name must be at least 2 characters" };
+    }
+    if (input.parent_name && /^\d+$/.test(input.parent_name.trim())) {
+      return { success: false, error: "Parent name must not be a number" };
+    }
+    if (input.phone && !isValidVietnamesePhone(input.phone.trim())) {
+      return { success: false, error: "Phone must be a valid Vietnamese number" };
     }
 
     await query(
@@ -240,21 +297,46 @@ export async function updateOnboardingStudent(
     if (!input.student_name.trim()) {
       return { success: false, error: "Student name is required" };
     }
+    if (input.student_name.trim().length < 2) {
+      return { success: false, error: "Name must be at least 2 characters" };
+    }
+    if (/^\d+$/.test(input.student_name.trim())) {
+      return { success: false, error: "Name must not be a number" };
+    }
     if (!input.course_name.trim()) {
       return { success: false, error: "Course name is required" };
     }
-    if (!input.student_email.trim()) {
-      return { success: false, error: "Student email is required" };
+    if (!input.student_email.trim() || !isValidEmail(input.student_email)) {
+      return { success: false, error: "Valid student email is required" };
     }
     if (!input.sign_date.trim()) {
       return { success: false, error: "Sign date is required" };
     }
+    if (!isValidDateDDMMYYYY(input.sign_date.trim())) {
+      return { success: false, error: "Sign date must be a valid date in DD/MM/YYYY format" };
+    }
     if (
       input.diagnostic_score !== null &&
-      input.diagnostic_score !== undefined &&
-      (input.diagnostic_score < 0 || input.diagnostic_score > 1600)
+      input.diagnostic_score !== undefined
     ) {
-      return { success: false, error: "Diagnostic score must be between 0 and 1600" };
+      if (!Number.isInteger(input.diagnostic_score)) {
+        return { success: false, error: "Diagnostic score must be a whole number" };
+      }
+      if (input.diagnostic_score < 0 || input.diagnostic_score > 1600) {
+        return { success: false, error: "Diagnostic score must be between 0 and 1600" };
+      }
+    }
+    if (input.parent_email && !isValidEmail(input.parent_email)) {
+      return { success: false, error: "Invalid parent email format" };
+    }
+    if (input.parent_name && input.parent_name.trim().length < 2) {
+      return { success: false, error: "Parent name must be at least 2 characters" };
+    }
+    if (input.parent_name && /^\d+$/.test(input.parent_name.trim())) {
+      return { success: false, error: "Parent name must not be a number" };
+    }
+    if (input.phone && !isValidVietnamesePhone(input.phone.trim())) {
+      return { success: false, error: "Phone must be a valid Vietnamese number" };
     }
 
     await query(
