@@ -16,10 +16,6 @@ import type {
   PaginatedResult,
 } from "@/lib/types";
 
-// ---------------------------------------------------------------------------
-// Lazy Resend client (same pattern as email-actions.ts)
-// ---------------------------------------------------------------------------
-
 let resendSalesClient: Resend | null = null;
 
 function getResendSalesClient(): Resend {
@@ -32,10 +28,6 @@ function getResendSalesClient(): Resend {
   }
   return resendSalesClient;
 }
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
 
 function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -53,9 +45,126 @@ function isValidDateDDMMYYYY(dateStr: string): boolean {
   const year = parseInt(match[3], 10);
   if (month < 1 || month > 12) return false;
   if (day < 1 || day > 31) return false;
-  // Check valid calendar date
   const date = new Date(year, month - 1, day);
   return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day;
+}
+
+function buildCourseLabel(courseName: string | null, code: string | null): string {
+  return [courseName?.trim(), code?.trim()].filter(Boolean).join(" ");
+}
+
+function formatCourseSummary(
+  student: Pick<StudentOnboarding, "course_math_name" | "math_code" | "course_verbal_name" | "verbal_code">
+): string {
+  const mathCourse = buildCourseLabel(student.course_math_name, student.math_code);
+  const verbalCourse = buildCourseLabel(student.course_verbal_name, student.verbal_code);
+
+  if (mathCourse && verbalCourse && mathCourse === verbalCourse) {
+    return mathCourse;
+  }
+
+  const parts: string[] = [];
+  if (mathCourse) {
+    parts.push(`${mathCourse} (Math)`);
+  }
+  if (verbalCourse) {
+    parts.push(`${verbalCourse} (Verbal)`);
+  }
+
+  return parts.join(" và ");
+}
+
+function formatCourseSummaryForEmailHtml(
+  student: Pick<StudentOnboarding, "course_math_name" | "math_code" | "course_verbal_name" | "verbal_code">
+): string {
+  const mathCourse = buildCourseLabel(student.course_math_name, student.math_code);
+  const verbalCourse = buildCourseLabel(student.course_verbal_name, student.verbal_code);
+
+  if (mathCourse && verbalCourse && mathCourse === verbalCourse) {
+    return mathCourse;
+  }
+
+  const parts: string[] = [];
+  if (mathCourse) {
+    parts.push(`${mathCourse} (Math)`);
+  }
+  if (verbalCourse) {
+    parts.push(`${verbalCourse} (Verbal)`);
+  }
+
+  return parts.join(" và<br />");
+}
+
+function validateRequiredInteger(
+  value: number,
+  fieldLabel: string,
+  min: number,
+  max: number
+): string | null {
+  if (!Number.isInteger(value)) {
+    return `${fieldLabel} must be a whole number`;
+  }
+  if (value < min || value > max) {
+    return `${fieldLabel} must be between ${min} and ${max}`;
+  }
+  return null;
+}
+
+function validateOnboardingInput(input: CreateOnboardingInput): string | null {
+  if (!input.student_name.trim()) {
+    return "Student name is required";
+  }
+  if (input.student_name.trim().length < 2) {
+    return "Name must be at least 2 characters";
+  }
+  if (/^\d+$/.test(input.student_name.trim())) {
+    return "Name must not be a number";
+  }
+  if (!input.course_math_name.trim()) {
+    return "Math course is required";
+  }
+  if (!input.math_code.trim()) {
+    return "Math code is required";
+  }
+  if (!input.course_verbal_name.trim()) {
+    return "Verbal course is required";
+  }
+  if (!input.verbal_code.trim()) {
+    return "Verbal code is required";
+  }
+  if (!input.student_email.trim() || !isValidEmail(input.student_email)) {
+    return "Valid student email is required";
+  }
+  if (!input.sign_date.trim()) {
+    return "Sign date is required";
+  }
+  if (!isValidDateDDMMYYYY(input.sign_date.trim())) {
+    return "Sign date must be a valid date in DD/MM/YYYY format";
+  }
+
+  const mathError = validateRequiredInteger(input.diagnostic_math_score, "Math diagnostic score", 0, 800);
+  if (mathError) return mathError;
+
+  const verbalError = validateRequiredInteger(input.diagnostic_verbal_score, "Verbal diagnostic score", 0, 800);
+  if (verbalError) return verbalError;
+
+  const totalError = validateRequiredInteger(input.diagnostic_total_score, "Total diagnostic score", 0, 1600);
+  if (totalError) return totalError;
+
+  if (input.parent_email && !isValidEmail(input.parent_email)) {
+    return "Invalid parent email format";
+  }
+  if (input.parent_name && input.parent_name.trim().length < 2) {
+    return "Parent name must be at least 2 characters";
+  }
+  if (input.parent_name && /^\d+$/.test(input.parent_name.trim())) {
+    return "Parent name must not be a number";
+  }
+  if (input.phone && !isValidVietnamesePhone(input.phone.trim())) {
+    return "Phone must be a valid Vietnamese number";
+  }
+
+  return null;
 }
 
 async function loadFile(relativePath: string): Promise<Buffer> {
@@ -63,9 +172,14 @@ async function loadFile(relativePath: string): Promise<Buffer> {
   return fs.readFile(fullPath);
 }
 
-// ---------------------------------------------------------------------------
-// CRUD Actions
-// ---------------------------------------------------------------------------
+function renderOnboardingEmailTemplate(template: string, student: StudentOnboarding): string {
+  const courseSummary = formatCourseSummaryForEmailHtml(student);
+
+  return template
+    .replace(/\[Tên học viên\]/g, student.student_name)
+    .replace(/\[Tổng hợp khóa học\]/g, courseSummary)
+    .replace(/\[Tên khóa học – ví dụ: BSAT \/ SSAT\]/g, courseSummary);
+}
 
 export async function getOnboardingStudents(
   filters: OnboardingFilters,
@@ -83,7 +197,12 @@ export async function getOnboardingStudents(
 
     if (search && search.trim()) {
       conditions.push(
-        `(student_name ILIKE $${paramIndex} OR student_email ILIKE $${paramIndex} OR course_name ILIKE $${paramIndex})`
+        `(student_name ILIKE $${paramIndex}
+          OR student_email ILIKE $${paramIndex}
+          OR course_math_name ILIKE $${paramIndex}
+          OR course_verbal_name ILIKE $${paramIndex}
+          OR math_code ILIKE $${paramIndex}
+          OR verbal_code ILIKE $${paramIndex})`
       );
       params.push(`%${search.trim()}%`);
       paramIndex++;
@@ -104,7 +223,7 @@ export async function getOnboardingStudents(
     const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
 
     const allowedSortColumns = [
-      "created_at", "updated_at", "student_name", "course_name",
+      "created_at", "updated_at", "student_name", "course_math_name",
       "student_email", "status", "sign_date", "sent_at",
     ];
     const safeSortBy = allowedSortColumns.includes(sortBy) ? sortBy : "created_at";
@@ -173,62 +292,29 @@ export async function createOnboardingStudent(
   input: CreateOnboardingInput
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    // Validation
-    if (!input.student_name.trim()) {
-      return { success: false, error: "Student name is required" };
-    }
-    if (input.student_name.trim().length < 2) {
-      return { success: false, error: "Name must be at least 2 characters" };
-    }
-    if (/^\d+$/.test(input.student_name.trim())) {
-      return { success: false, error: "Name must not be a number" };
-    }
-    if (!input.course_name.trim()) {
-      return { success: false, error: "Course name is required" };
-    }
-    if (!input.student_email.trim() || !isValidEmail(input.student_email)) {
-      return { success: false, error: "Valid student email is required" };
-    }
-    if (!input.sign_date.trim()) {
-      return { success: false, error: "Sign date is required" };
-    }
-    if (!isValidDateDDMMYYYY(input.sign_date.trim())) {
-      return { success: false, error: "Sign date must be a valid date in DD/MM/YYYY format" };
-    }
-    if (
-      input.diagnostic_score !== null &&
-      input.diagnostic_score !== undefined
-    ) {
-      if (!Number.isInteger(input.diagnostic_score)) {
-        return { success: false, error: "Diagnostic score must be a whole number" };
-      }
-      if (input.diagnostic_score < 0 || input.diagnostic_score > 1600) {
-        return { success: false, error: "Diagnostic score must be between 0 and 1600" };
-      }
-    }
-    if (input.parent_email && !isValidEmail(input.parent_email)) {
-      return { success: false, error: "Invalid parent email format" };
-    }
-    if (input.parent_name && input.parent_name.trim().length < 2) {
-      return { success: false, error: "Parent name must be at least 2 characters" };
-    }
-    if (input.parent_name && /^\d+$/.test(input.parent_name.trim())) {
-      return { success: false, error: "Parent name must not be a number" };
-    }
-    if (input.phone && !isValidVietnamesePhone(input.phone.trim())) {
-      return { success: false, error: "Phone must be a valid Vietnamese number" };
+    const validationError = validateOnboardingInput(input);
+    if (validationError) {
+      return { success: false, error: validationError };
     }
 
     await query(
       `INSERT INTO student_onboarding
-        (student_name, course_name, diagnostic_score, output_commitment, sign_date,
+        (student_name, diagnostic_math_score, diagnostic_verbal_score, diagnostic_total_score,
+         course_math_name, math_code, course_verbal_name, verbal_code,
+         output_commitment_math, output_commitment_verbal, sign_date,
          representative_name, student_email, parent_name, parent_email, phone)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)`,
       [
         input.student_name.trim(),
-        input.course_name.trim(),
-        input.diagnostic_score ?? null,
-        input.output_commitment,
+        input.diagnostic_math_score,
+        input.diagnostic_verbal_score,
+        input.diagnostic_total_score,
+        input.course_math_name.trim(),
+        input.math_code.trim(),
+        input.course_verbal_name.trim(),
+        input.verbal_code.trim(),
+        input.output_commitment_math,
+        input.output_commitment_verbal,
         input.sign_date.trim(),
         input.representative_name?.trim() || null,
         input.student_email.trim().toLowerCase(),
@@ -250,7 +336,6 @@ export async function deleteOnboardingStudent(
   id: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    // Only allow deleting pending students
     const existing = await query<{ status: string }>(
       `SELECT status FROM student_onboarding WHERE id = $1`,
       [id]
@@ -279,7 +364,6 @@ export async function updateOnboardingStudent(
   input: CreateOnboardingInput
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    // Only allow editing pending students
     const existing = await query<{ status: string }>(
       `SELECT status FROM student_onboarding WHERE id = $1`,
       [id]
@@ -293,65 +377,32 @@ export async function updateOnboardingStudent(
       return { success: false, error: "Cannot edit a student that has already been sent" };
     }
 
-    // Validation
-    if (!input.student_name.trim()) {
-      return { success: false, error: "Student name is required" };
-    }
-    if (input.student_name.trim().length < 2) {
-      return { success: false, error: "Name must be at least 2 characters" };
-    }
-    if (/^\d+$/.test(input.student_name.trim())) {
-      return { success: false, error: "Name must not be a number" };
-    }
-    if (!input.course_name.trim()) {
-      return { success: false, error: "Course name is required" };
-    }
-    if (!input.student_email.trim() || !isValidEmail(input.student_email)) {
-      return { success: false, error: "Valid student email is required" };
-    }
-    if (!input.sign_date.trim()) {
-      return { success: false, error: "Sign date is required" };
-    }
-    if (!isValidDateDDMMYYYY(input.sign_date.trim())) {
-      return { success: false, error: "Sign date must be a valid date in DD/MM/YYYY format" };
-    }
-    if (
-      input.diagnostic_score !== null &&
-      input.diagnostic_score !== undefined
-    ) {
-      if (!Number.isInteger(input.diagnostic_score)) {
-        return { success: false, error: "Diagnostic score must be a whole number" };
-      }
-      if (input.diagnostic_score < 0 || input.diagnostic_score > 1600) {
-        return { success: false, error: "Diagnostic score must be between 0 and 1600" };
-      }
-    }
-    if (input.parent_email && !isValidEmail(input.parent_email)) {
-      return { success: false, error: "Invalid parent email format" };
-    }
-    if (input.parent_name && input.parent_name.trim().length < 2) {
-      return { success: false, error: "Parent name must be at least 2 characters" };
-    }
-    if (input.parent_name && /^\d+$/.test(input.parent_name.trim())) {
-      return { success: false, error: "Parent name must not be a number" };
-    }
-    if (input.phone && !isValidVietnamesePhone(input.phone.trim())) {
-      return { success: false, error: "Phone must be a valid Vietnamese number" };
+    const validationError = validateOnboardingInput(input);
+    if (validationError) {
+      return { success: false, error: validationError };
     }
 
     await query(
       `UPDATE student_onboarding SET
-        student_name = $2, course_name = $3, diagnostic_score = $4,
-        output_commitment = $5, sign_date = $6, representative_name = $7,
-        student_email = $8, parent_name = $9, parent_email = $10,
-        phone = $11, updated_at = NOW()
+        student_name = $2, diagnostic_math_score = $3, diagnostic_verbal_score = $4,
+        diagnostic_total_score = $5, course_math_name = $6, math_code = $7,
+        course_verbal_name = $8, verbal_code = $9, output_commitment_math = $10,
+        output_commitment_verbal = $11, sign_date = $12, representative_name = $13,
+        student_email = $14, parent_name = $15, parent_email = $16,
+        phone = $17, updated_at = NOW()
        WHERE id = $1`,
       [
         id,
         input.student_name.trim(),
-        input.course_name.trim(),
-        input.diagnostic_score ?? null,
-        input.output_commitment,
+        input.diagnostic_math_score,
+        input.diagnostic_verbal_score,
+        input.diagnostic_total_score,
+        input.course_math_name.trim(),
+        input.math_code.trim(),
+        input.course_verbal_name.trim(),
+        input.verbal_code.trim(),
+        input.output_commitment_math,
+        input.output_commitment_verbal,
         input.sign_date.trim(),
         input.representative_name?.trim() || null,
         input.student_email.trim().toLowerCase(),
@@ -369,10 +420,6 @@ export async function updateOnboardingStudent(
   }
 }
 
-// ---------------------------------------------------------------------------
-// PDF Generation
-// ---------------------------------------------------------------------------
-
 export async function generateOnboardingPdfs(
   studentId: string
 ): Promise<{ success: boolean; luuY?: string; baoLuu?: string; error?: string }> {
@@ -387,26 +434,29 @@ export async function generateOnboardingPdfs(
       return { success: false, error: "Student not found" };
     }
 
-    // Load templates and font
     const [luuYTemplate, baoLuuTemplate, fontBytes] = await Promise.all([
       loadFile("templates/QAS_LuuY_HocVien.pdf"),
       loadFile("templates/QAS_QuyDinh_BaoLuu.pdf"),
       loadFile("fonts/NotoSerif-Regular.ttf"),
     ]);
 
-    // Fill LuuY PDF (7 fields)
-    const diagnosticText =
-      student.diagnostic_score !== null
-        ? `${student.diagnostic_score}`
-        : "";
-
     const luuYBytes = await fillPdfTemplate(
       new Uint8Array(luuYTemplate),
       {
-        course_name: student.course_name,
-        diagnostic_score: diagnosticText,
-        output_commitment_yes: student.output_commitment ? "X" : "",
-        output_commitment_no: student.output_commitment ? "" : "X",
+        diagnostic_math_score:
+          student.diagnostic_math_score !== null ? `${student.diagnostic_math_score}` : "",
+        diagnostic_verbal_score:
+          student.diagnostic_verbal_score !== null ? `${student.diagnostic_verbal_score}` : "",
+        diagnostic_total_score:
+          student.diagnostic_total_score !== null ? `${student.diagnostic_total_score}` : "",
+        course_math_name: student.course_math_name || "",
+        math_code: student.math_code || "",
+        course_verbal_name: student.course_verbal_name || "",
+        verbal_code: student.verbal_code || "",
+        output_commitment_math_yes: student.output_commitment_math ? "X" : "",
+        output_commitment_math_no: student.output_commitment_math ? "" : "X",
+        output_commitment_verbal_yes: student.output_commitment_verbal ? "X" : "",
+        output_commitment_verbal_no: student.output_commitment_verbal ? "" : "X",
         student_name: student.student_name,
         sign_date: student.sign_date,
         representative_name: student.representative_name || "",
@@ -415,7 +465,6 @@ export async function generateOnboardingPdfs(
       new Uint8Array(fontBytes)
     );
 
-    // Fill BaoLuu PDF (3 fields)
     const baoLuuBytes = await fillPdfTemplate(
       new Uint8Array(baoLuuTemplate),
       {
@@ -426,7 +475,6 @@ export async function generateOnboardingPdfs(
       new Uint8Array(fontBytes)
     );
 
-    // Return as base64 strings so they can be sent to the client
     return {
       success: true,
       luuY: Buffer.from(luuYBytes).toString("base64"),
@@ -437,10 +485,6 @@ export async function generateOnboardingPdfs(
     return { success: false, error: "Failed to generate PDFs" };
   }
 }
-
-// ---------------------------------------------------------------------------
-// Email
-// ---------------------------------------------------------------------------
 
 export async function previewOnboardingEmail(
   studentId: string
@@ -457,14 +501,7 @@ export async function previewOnboardingEmail(
     }
 
     const templateBuffer = await loadFile("templates/QAS_Email_Template.html");
-    let html = templateBuffer.toString("utf-8");
-
-    // Replace placeholders
-    html = html.replace(/\[Tên học viên\]/g, student.student_name);
-    html = html.replace(
-      /\[Tên khóa học – ví dụ: BSAT \/ SSAT\]/g,
-      student.course_name
-    );
+    const html = renderOnboardingEmailTemplate(templateBuffer.toString("utf-8"), student);
 
     return { success: true, html };
   } catch (error) {
@@ -492,31 +529,23 @@ export async function sendOnboardingEmail(
       return { success: false, error: "Email already sent for this student" };
     }
 
-    // Generate PDFs
     const pdfResult = await generateOnboardingPdfs(studentId);
     if (!pdfResult.success || !pdfResult.luuY || !pdfResult.baoLuu) {
       return { success: false, error: pdfResult.error || "Failed to generate PDFs" };
     }
 
-    // Load and render email HTML
     const templateBuffer = await loadFile("templates/QAS_Email_Template.html");
-    let html = templateBuffer.toString("utf-8");
-    html = html.replace(/\[Tên học viên\]/g, student.student_name);
-    html = html.replace(
-      /\[Tên khóa học – ví dụ: BSAT \/ SSAT\]/g,
-      student.course_name
-    );
+    const html = renderOnboardingEmailTemplate(templateBuffer.toString("utf-8"), student);
 
     const safeName = removeDiacritics(student.student_name);
-    const subject = `QAS Academy — Thông tin đăng ký khóa ${student.course_name}`;
+    const courseSummary = formatCourseSummary(student);
+    const subject = `QAS Academy — Thông tin đăng ký khóa ${courseSummary}`;
 
-    // Build CC list
     const cc: string[] = [];
     if (student.parent_email) {
       cc.push(student.parent_email);
     }
 
-    // Send via Resend
     const { data, error } = await getResendSalesClient().emails.send({
       from: `QAS Academy <sales@qascademy.com>`,
       to: student.student_email,
@@ -536,7 +565,6 @@ export async function sendOnboardingEmail(
     });
 
     if (error) {
-      // Update status to failed
       await query(
         `UPDATE student_onboarding
          SET status = 'failed', error_message = $2, sent_by = $3, updated_at = NOW()
@@ -547,7 +575,6 @@ export async function sendOnboardingEmail(
       return { success: false, error: error.message };
     }
 
-    // Update status to sent
     await query(
       `UPDATE student_onboarding
        SET status = 'sent', resend_message_id = $2, sent_by = $3, sent_at = NOW(), error_message = NULL, updated_at = NOW()
@@ -560,7 +587,6 @@ export async function sendOnboardingEmail(
   } catch (error) {
     console.error("Error sending onboarding email:", error);
 
-    // Update status to failed
     await query(
       `UPDATE student_onboarding
        SET status = 'failed', error_message = $2, sent_by = $3, updated_at = NOW()
@@ -581,7 +607,6 @@ export async function sendBulkOnboardingEmails(
   let sent = 0;
   let failed = 0;
 
-  // Send sequentially to avoid Resend rate limits
   for (const id of studentIds) {
     const result = await sendOnboardingEmail(id, senderEmail);
     results.push({ id, success: result.success, error: result.error });

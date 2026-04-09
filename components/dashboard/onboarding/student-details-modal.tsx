@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { Modal } from "@/components/ui/modal";
 import { Badge } from "@/components/ui/badge";
+import { getUserDisplayName } from "@/lib/user-display";
 import type { StudentOnboarding } from "@/lib/types";
 
 interface StudentDetailsModalProps {
@@ -24,9 +25,24 @@ export function StudentDetailsModal({ isOpen, onClose, student }: StudentDetails
 
   const rows: { label: string; value: string | null }[] = [
     { label: t("studentName"), value: student.student_name },
-    { label: t("course"), value: student.course_name },
-    { label: t("diagnosticScore"), value: student.diagnostic_score !== null ? `${student.diagnostic_score} / 1600` : "—" },
-    { label: t("outputCommitment"), value: student.output_commitment ? t("yes") : t("no") },
+    {
+      label: t("diagnosticMathScore"),
+      value: student.diagnostic_math_score !== null ? `${student.diagnostic_math_score} / 800` : "—",
+    },
+    {
+      label: t("diagnosticVerbalScore"),
+      value: student.diagnostic_verbal_score !== null ? `${student.diagnostic_verbal_score} / 800` : "—",
+    },
+    {
+      label: t("diagnosticTotalScore"),
+      value: student.diagnostic_total_score !== null ? `${student.diagnostic_total_score} / 1600` : "—",
+    },
+    { label: t("mathCourse"), value: student.course_math_name || "—" },
+    { label: t("mathCode"), value: student.math_code || "—" },
+    { label: t("verbalCourse"), value: student.course_verbal_name || "—" },
+    { label: t("verbalCode"), value: student.verbal_code || "—" },
+    { label: t("outputCommitmentMath"), value: student.output_commitment_math ? t("yes") : t("no") },
+    { label: t("outputCommitmentVerbal"), value: student.output_commitment_verbal ? t("yes") : t("no") },
     { label: t("signDate"), value: student.sign_date },
     { label: t("representativeName"), value: student.representative_name || "—" },
     { label: t("studentEmail"), value: student.student_email },
@@ -38,7 +54,6 @@ export function StudentDetailsModal({ isOpen, onClose, student }: StudentDetails
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={t("viewDetails")} size="lg">
       <div className="space-y-4">
-        {/* Status badge */}
         <div className="flex items-center gap-2">
           <span className="text-sm text-muted-foreground">{t("status")}:</span>
           <Badge variant={STATUS_VARIANT[student.status] || "warning"}>
@@ -46,17 +61,15 @@ export function StudentDetailsModal({ isOpen, onClose, student }: StudentDetails
           </Badge>
         </div>
 
-        {/* Info rows */}
         <div className="rounded-lg border border-border divide-y divide-border">
           {rows.map((row) => (
             <div key={row.label} className="flex px-4 py-3">
-              <span className="w-40 shrink-0 text-sm text-muted-foreground">{row.label}</span>
+              <span className="w-48 shrink-0 text-sm text-muted-foreground">{row.label}</span>
               <span className="text-sm font-medium text-foreground">{row.value}</span>
             </div>
           ))}
         </div>
 
-        {/* Send info (if sent or failed) */}
         {student.status !== "pending" && (
           <div className="rounded-lg border border-border bg-muted/30 p-4 space-y-2">
             {student.sent_at && (
@@ -68,7 +81,7 @@ export function StudentDetailsModal({ isOpen, onClose, student }: StudentDetails
             {student.sent_by && (
               <div className="flex gap-2 text-sm">
                 <span className="text-muted-foreground">{t("sentBy")}:</span>
-                <span className="font-medium">{student.sent_by}</span>
+                <span className="font-medium">{getUserDisplayName(student.sent_by, null)}</span>
               </div>
             )}
             {student.error_message && (

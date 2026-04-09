@@ -16,6 +16,21 @@ interface SendConfirmModalProps {
   progress?: { current: number; total: number };
 }
 
+function formatCourseSummary(student: StudentOnboarding): string {
+  const parts: string[] = [];
+  if (student.course_math_name) {
+    parts.push(
+      student.math_code ? `${student.course_math_name} (${student.math_code})` : student.course_math_name
+    );
+  }
+  if (student.course_verbal_name) {
+    parts.push(
+      student.verbal_code ? `${student.course_verbal_name} (${student.verbal_code})` : student.course_verbal_name
+    );
+  }
+  return parts.join(" + ");
+}
+
 export function SendConfirmModal({
   isOpen,
   onClose,
@@ -45,8 +60,8 @@ export function SendConfirmModal({
                 <span className="font-medium">{student.student_name}</span>
               </p>
               <p className="text-sm">
-                <span className="text-muted-foreground">{t("course")}:</span>{" "}
-                <span className="font-medium">{student.course_name}</span>
+                <span className="text-muted-foreground">{t("courseSummary")}:</span>{" "}
+                <span className="font-medium">{formatCourseSummary(student) || "—"}</span>
               </p>
               <p className="text-sm">
                 <span className="text-muted-foreground">{t("email")}:</span>{" "}

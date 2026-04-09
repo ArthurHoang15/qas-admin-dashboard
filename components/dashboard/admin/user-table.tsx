@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { User, ToggleLeft, ToggleRight, Trash2, X, AlertTriangle } from "lucide-react";
 import { RoleSelect } from "./role-select";
 import { toggleUserActive, deleteUser } from "@/actions/rbac-actions";
+import { getUserDisplayName } from "@/lib/user-display";
 import type { AppUser } from "@/lib/types";
 
 interface UserTableProps {
@@ -96,16 +98,21 @@ export function UserTable({ users, onUpdate, currentUserId }: UserTableProps) {
           </tr>
         </thead>
         <tbody>
-          {users.map((user) => (
+          {users.map((user) => {
+            const displayName = getUserDisplayName(user.email, user.full_name);
+
+            return (
             <tr key={user.id} className="border-b border-border hover:bg-muted/50">
               <td className="py-3 px-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                  <div className="relative w-10 h-10 rounded-full bg-muted flex items-center justify-center overflow-hidden">
                     {user.avatar_url ? (
-                      <img
+                      <Image
                         src={user.avatar_url}
-                        alt={user.full_name || user.email}
-                        className="w-10 h-10 rounded-full object-cover"
+                        alt={displayName}
+                        fill
+                        sizes="40px"
+                        className="object-cover"
                       />
                     ) : (
                       <User className="w-5 h-5 text-muted-foreground" />
@@ -113,7 +120,7 @@ export function UserTable({ users, onUpdate, currentUserId }: UserTableProps) {
                   </div>
                   <div>
                     <div className="font-medium text-foreground">
-                      {user.full_name || 'No name'}
+                      {displayName}
                     </div>
                     <div className="text-sm text-muted-foreground">{user.email}</div>
                   </div>
@@ -173,7 +180,8 @@ export function UserTable({ users, onUpdate, currentUserId }: UserTableProps) {
                 </div>
               </td>
             </tr>
-          ))}
+            );
+          })}
         </tbody>
       </table>
 
@@ -193,7 +201,7 @@ export function UserTable({ users, onUpdate, currentUserId }: UserTableProps) {
                   {t("confirmDeleteMessage")}
                 </p>
                 <p className="mt-2 text-sm font-medium text-foreground">
-                  {deleteConfirm.full_name || deleteConfirm.email}
+                  {getUserDisplayName(deleteConfirm.email, deleteConfirm.full_name)}
                 </p>
               </div>
               <button

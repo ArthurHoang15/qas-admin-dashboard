@@ -56,9 +56,15 @@ export function AddStudentModal({ isOpen, onClose, onSuccess }: AddStudentModalP
   const t = useTranslations("onboarding");
 
   const [studentName, setStudentName] = useState("");
-  const [courseName, setCourseName] = useState("");
-  const [diagnosticScore, setDiagnosticScore] = useState("");
-  const [outputCommitment, setOutputCommitment] = useState(true);
+  const [diagnosticMathScore, setDiagnosticMathScore] = useState("");
+  const [diagnosticVerbalScore, setDiagnosticVerbalScore] = useState("");
+  const [diagnosticTotalScore, setDiagnosticTotalScore] = useState("");
+  const [courseMathName, setCourseMathName] = useState("");
+  const [mathCode, setMathCode] = useState("");
+  const [courseVerbalName, setCourseVerbalName] = useState("");
+  const [verbalCode, setVerbalCode] = useState("");
+  const [outputCommitmentMath, setOutputCommitmentMath] = useState(true);
+  const [outputCommitmentVerbal, setOutputCommitmentVerbal] = useState(true);
   const [signDate, setSignDate] = useState(getTodayString());
   const [studentEmail, setStudentEmail] = useState("");
   const [parentName, setParentName] = useState("");
@@ -70,9 +76,15 @@ export function AddStudentModal({ isOpen, onClose, onSuccess }: AddStudentModalP
 
   const resetForm = () => {
     setStudentName("");
-    setCourseName("");
-    setDiagnosticScore("");
-    setOutputCommitment(true);
+    setDiagnosticMathScore("");
+    setDiagnosticVerbalScore("");
+    setDiagnosticTotalScore("");
+    setCourseMathName("");
+    setMathCode("");
+    setCourseVerbalName("");
+    setVerbalCode("");
+    setOutputCommitmentMath(true);
+    setOutputCommitmentVerbal(true);
     setSignDate(getTodayString());
     setStudentEmail("");
     setParentName("");
@@ -98,8 +110,17 @@ export function AddStudentModal({ isOpen, onClose, onSuccess }: AddStudentModalP
       errors.studentName = t("validation.nameNotNumber");
     }
 
-    if (!courseName) {
-      errors.courseName = t("validation.courseRequired");
+    if (!courseMathName) {
+      errors.courseMathName = t("validation.mathCourseRequired");
+    }
+    if (!mathCode.trim()) {
+      errors.mathCode = t("validation.mathCodeRequired");
+    }
+    if (!courseVerbalName) {
+      errors.courseVerbalName = t("validation.verbalCourseRequired");
+    }
+    if (!verbalCode.trim()) {
+      errors.verbalCode = t("validation.verbalCodeRequired");
     }
 
     if (!studentEmail.trim()) {
@@ -114,16 +135,51 @@ export function AddStudentModal({ isOpen, onClose, onSuccess }: AddStudentModalP
       errors.signDate = t("validation.signDateFormat");
     }
 
-    if (!diagnosticScore.trim()) {
-      errors.diagnosticScore = t("validation.scoreRequired");
-    } else {
-      const scoreNum = Number(diagnosticScore);
-      if (isNaN(scoreNum) || scoreNum < 0 || scoreNum > 1600) {
-        errors.diagnosticScore = t("validation.scoreRange");
-      } else if (!Number.isInteger(scoreNum)) {
-        errors.diagnosticScore = t("validation.scoreInteger");
+    const validateScore = (
+      rawValue: string,
+      fieldName: string,
+      requiredKey: string,
+      rangeKey: string,
+      min: number,
+      max: number
+    ) => {
+      if (!rawValue.trim()) {
+        errors[fieldName] = t(requiredKey);
+        return;
       }
-    }
+
+      const scoreNum = Number(rawValue);
+      if (isNaN(scoreNum) || scoreNum < min || scoreNum > max) {
+        errors[fieldName] = t(rangeKey, { min, max });
+      } else if (!Number.isInteger(scoreNum)) {
+        errors[fieldName] = t("validation.scoreInteger");
+      }
+    };
+
+    validateScore(
+      diagnosticMathScore,
+      "diagnosticMathScore",
+      "validation.mathScoreRequired",
+      "validation.mathScoreRange",
+      0,
+      800
+    );
+    validateScore(
+      diagnosticVerbalScore,
+      "diagnosticVerbalScore",
+      "validation.verbalScoreRequired",
+      "validation.verbalScoreRange",
+      0,
+      800
+    );
+    validateScore(
+      diagnosticTotalScore,
+      "diagnosticTotalScore",
+      "validation.totalScoreRequired",
+      "validation.totalScoreRange",
+      0,
+      1600
+    );
 
     if (parentName.trim() && parentName.trim().length < 2) {
       errors.parentName = t("validation.nameMinLength");
@@ -148,15 +204,19 @@ export function AddStudentModal({ isOpen, onClose, onSuccess }: AddStudentModalP
     setFieldErrors(errors);
     if (Object.keys(errors).length > 0) return;
 
-    const scoreNum = Number(diagnosticScore);
-
     setIsSubmitting(true);
     try {
       const input: CreateOnboardingInput = {
         student_name: studentName.trim(),
-        course_name: courseName,
-        diagnostic_score: scoreNum,
-        output_commitment: outputCommitment,
+        diagnostic_math_score: Number(diagnosticMathScore),
+        diagnostic_verbal_score: Number(diagnosticVerbalScore),
+        diagnostic_total_score: Number(diagnosticTotalScore),
+        course_math_name: courseMathName,
+        math_code: mathCode.trim(),
+        course_verbal_name: courseVerbalName,
+        verbal_code: verbalCode.trim(),
+        output_commitment_math: outputCommitmentMath,
+        output_commitment_verbal: outputCommitmentVerbal,
         sign_date: signDate.trim(),
         representative_name: "QAS Academy",
         student_email: studentEmail.trim(),
@@ -183,7 +243,6 @@ export function AddStudentModal({ isOpen, onClose, onSuccess }: AddStudentModalP
   return (
     <Modal isOpen={isOpen} onClose={handleClose} title={t("addStudent")} size="lg">
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Section 1: PDF Fields */}
         <div>
           <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">
             {t("sectionPdf")}
@@ -196,37 +255,109 @@ export function AddStudentModal({ isOpen, onClose, onSuccess }: AddStudentModalP
               placeholder={t("studentNamePlaceholder")}
               error={fieldErrors.studentName}
             />
-            <Select
-              label={t("course") + " *"}
-              options={COURSE_OPTIONS}
-              value={courseName}
-              onChange={(e) => setCourseName(e.target.value)}
-              error={fieldErrors.courseName}
-            />
-            <div className="flex items-end gap-2">
-              <div className="flex-1">
-                <Input
-                  label={t("diagnosticScore") + " *"}
-                  type="number"
-                  min={0}
-                  max={1600}
-                  value={diagnosticScore}
-                  onChange={(e) => setDiagnosticScore(e.target.value)}
-                  placeholder="0"
-                  error={fieldErrors.diagnosticScore}
-                />
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+              <div className="flex items-end gap-2">
+                <div className="flex-1">
+                  <Input
+                    label={t("diagnosticMathScore") + " *"}
+                    type="number"
+                    min={0}
+                    max={800}
+                    value={diagnosticMathScore}
+                    onChange={(e) => setDiagnosticMathScore(e.target.value)}
+                    placeholder="0"
+                    error={fieldErrors.diagnosticMathScore}
+                  />
+                </div>
+                <span className="pb-2 text-sm text-muted-foreground">/ 800</span>
               </div>
-              <span className="pb-2 text-sm text-muted-foreground">/ 1600</span>
+              <div className="flex items-end gap-2">
+                <div className="flex-1">
+                  <Input
+                    label={t("diagnosticVerbalScore") + " *"}
+                    type="number"
+                    min={0}
+                    max={800}
+                    value={diagnosticVerbalScore}
+                    onChange={(e) => setDiagnosticVerbalScore(e.target.value)}
+                    placeholder="0"
+                    error={fieldErrors.diagnosticVerbalScore}
+                  />
+                </div>
+                <span className="pb-2 text-sm text-muted-foreground">/ 800</span>
+              </div>
+              <div className="flex items-end gap-2">
+                <div className="flex-1">
+                  <Input
+                    label={t("diagnosticTotalScore") + " *"}
+                    type="number"
+                    min={0}
+                    max={1600}
+                    value={diagnosticTotalScore}
+                    onChange={(e) => setDiagnosticTotalScore(e.target.value)}
+                    placeholder="0"
+                    error={fieldErrors.diagnosticTotalScore}
+                  />
+                </div>
+                <span className="pb-2 text-sm text-muted-foreground">/ 1600</span>
+              </div>
             </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_180px] gap-4 items-start">
+              <Select
+                label={t("mathCourse") + " *"}
+                options={COURSE_OPTIONS}
+                value={courseMathName}
+                onChange={(e) => setCourseMathName(e.target.value)}
+                error={fieldErrors.courseMathName}
+              />
+              <Input
+                label={t("mathCode") + " *"}
+                value={mathCode}
+                onChange={(e) => setMathCode(e.target.value)}
+                placeholder={t("mathCodePlaceholder")}
+                error={fieldErrors.mathCode}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_180px] gap-4 items-start">
+              <Select
+                label={t("verbalCourse") + " *"}
+                options={COURSE_OPTIONS}
+                value={courseVerbalName}
+                onChange={(e) => setCourseVerbalName(e.target.value)}
+                error={fieldErrors.courseVerbalName}
+              />
+              <Input
+                label={t("verbalCode") + " *"}
+                value={verbalCode}
+                onChange={(e) => setVerbalCode(e.target.value)}
+                placeholder={t("verbalCodePlaceholder")}
+                error={fieldErrors.verbalCode}
+              />
+            </div>
+
             <div className="flex items-center gap-3">
               <Checkbox
-                checked={outputCommitment}
-                onCheckedChange={() => setOutputCommitment(!outputCommitment)}
+                checked={outputCommitmentMath}
+                onCheckedChange={() => setOutputCommitmentMath(!outputCommitmentMath)}
               />
               <span className="text-sm font-medium text-foreground">
-                {t("outputCommitment")}
+                {t("outputCommitmentMath")}
               </span>
             </div>
+
+            <div className="flex items-center gap-3">
+              <Checkbox
+                checked={outputCommitmentVerbal}
+                onCheckedChange={() => setOutputCommitmentVerbal(!outputCommitmentVerbal)}
+              />
+              <span className="text-sm font-medium text-foreground">
+                {t("outputCommitmentVerbal")}
+              </span>
+            </div>
+
             <Input
               label={t("signDate") + " *"}
               value={signDate}
@@ -234,6 +365,7 @@ export function AddStudentModal({ isOpen, onClose, onSuccess }: AddStudentModalP
               placeholder="DD/MM/YYYY"
               error={fieldErrors.signDate}
             />
+
             <div>
               <label className="block text-sm font-medium text-foreground mb-1">
                 {t("representativeName")}
@@ -245,7 +377,6 @@ export function AddStudentModal({ isOpen, onClose, onSuccess }: AddStudentModalP
           </div>
         </div>
 
-        {/* Section 2: Email Fields */}
         <div>
           <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">
             {t("sectionEmail")}
