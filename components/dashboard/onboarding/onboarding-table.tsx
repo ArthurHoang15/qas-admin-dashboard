@@ -6,6 +6,7 @@ import { MoreHorizontal, Eye, Download, Send, Trash2, Pencil, Info } from "lucid
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { getUserDisplayName } from "@/lib/user-display";
 import type { StudentOnboarding } from "@/lib/types";
 
 interface OnboardingTableProps {
@@ -189,7 +190,7 @@ export function OnboardingTable({
                       {formatRelativeTime(student.sent_at)}
                     </td>
                     <td className="px-4 py-3 text-sm text-muted-foreground whitespace-nowrap">
-                      {student.sent_by || "—"}
+                      {student.sent_by ? getUserDisplayName(student.sent_by, null) : "—"}
                     </td>
                     <td className="px-4 py-3 text-sm text-right whitespace-nowrap">
                       <Button

@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { Modal } from "@/components/ui/modal";
 import { Badge } from "@/components/ui/badge";
+import { getUserDisplayName } from "@/lib/user-display";
 import type { StudentOnboarding } from "@/lib/types";
 
 interface StudentDetailsModalProps {
@@ -80,7 +81,7 @@ export function StudentDetailsModal({ isOpen, onClose, student }: StudentDetails
             {student.sent_by && (
               <div className="flex gap-2 text-sm">
                 <span className="text-muted-foreground">{t("sentBy")}:</span>
-                <span className="font-medium">{student.sent_by}</span>
+                <span className="font-medium">{getUserDisplayName(student.sent_by, null)}</span>
               </div>
             )}
             {student.error_message && (

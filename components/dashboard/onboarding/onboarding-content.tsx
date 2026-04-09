@@ -52,7 +52,7 @@ export function OnboardingContent() {
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [senders, setSenders] = useState<string[]>([]);
-  const [currentUserName, setCurrentUserName] = useState<string>("admin");
+  const [currentUserName, setCurrentUserName] = useState<string>("admin@example.com");
 
   // Selection state
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -98,7 +98,7 @@ export function OnboardingContent() {
   useEffect(() => {
     getCurrentUser().then((user) => {
       if (user) {
-        setCurrentUserName(user.full_name || user.email);
+        setCurrentUserName(user.email);
       }
     });
   }, []);

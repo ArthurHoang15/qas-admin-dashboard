@@ -5,6 +5,7 @@ import { Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { getUserDisplayName } from "@/lib/user-display";
 import type { OnboardingFilters as Filters } from "@/lib/types";
 
 interface OnboardingFiltersProps {
@@ -31,7 +32,7 @@ export function OnboardingFilters({
 
   const senderOptions = [
     { value: "", label: t("sentByAll") },
-    ...senders.map((s) => ({ value: s, label: s })),
+    ...senders.map((s) => ({ value: s, label: getUserDisplayName(s, null) })),
   ];
 
   const hasActiveFilters = filters.search || filters.status || filters.sent_by;
