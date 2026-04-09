@@ -34,6 +34,15 @@ const COURSE_COLORS: Record<string, string> = {
   "SAT 1-1": "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400",
 };
 
+function getCourseColor(course: string) {
+  return COURSE_COLORS[course.toUpperCase()] || "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400";
+}
+
+function formatCourseBadgeLabel(courseName: string | null, code: string | null) {
+  if (!courseName) return null;
+  return code?.trim() ? `${courseName} (${code.trim()})` : courseName;
+}
+
 export function OnboardingTable({
   students,
   selectedIds,
@@ -61,12 +70,11 @@ export function OnboardingTable({
     const btn = buttonRefs.current.get(studentId);
     if (btn) {
       const rect = btn.getBoundingClientRect();
-      setDropdownPos({ top: rect.bottom + 4, left: rect.right - 192 }); // 192 = w-48
+      setDropdownPos({ top: rect.bottom + 4, left: rect.right - 192 });
     }
     setOpenDropdown(studentId);
   }, [openDropdown]);
 
-  // Close dropdown on scroll
   useEffect(() => {
     if (!openDropdown) return;
     const close = () => setOpenDropdown(null);
@@ -87,10 +95,6 @@ export function OnboardingTable({
     if (diffMin < 60) return `${diffMin}m`;
     if (diffHours < 24) return `${diffHours}h`;
     return `${diffDays}d`;
-  };
-
-  const getCourseColor = (course: string) => {
-    return COURSE_COLORS[course.toUpperCase()] || "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400";
   };
 
   const currentStudent = openDropdown ? students.find((s) => s.id === openDropdown) : null;
@@ -114,7 +118,7 @@ export function OnboardingTable({
                   {t("studentName")}
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  {t("course")}
+                  {t("courseSummary")}
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   {t("email")}
@@ -139,6 +143,9 @@ export function OnboardingTable({
             <tbody className="divide-y divide-border">
               {students.map((student) => {
                 const statusInfo = STATUS_STYLES[student.status] || STATUS_STYLES.pending;
+                const mathLabel = formatCourseBadgeLabel(student.course_math_name, student.math_code);
+                const verbalLabel = formatCourseBadgeLabel(student.course_verbal_name, student.verbal_code);
+
                 return (
                   <tr key={student.id} className="hover:bg-muted/30 transition-colors">
                     <td className="px-4 py-3">
@@ -152,10 +159,20 @@ export function OnboardingTable({
                     <td className="px-4 py-3 text-sm font-medium text-foreground whitespace-nowrap">
                       {student.student_name}
                     </td>
-                    <td className="px-4 py-3 text-sm whitespace-nowrap">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getCourseColor(student.course_name)}`}>
-                        {student.course_name}
-                      </span>
+                    <td className="px-4 py-3 text-sm">
+                      <div className="flex flex-wrap gap-2">
+                        {mathLabel && (
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getCourseColor(student.course_math_name || "")}`}>
+                            {mathLabel}
+                          </span>
+                        )}
+                        {verbalLabel && (
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getCourseColor(student.course_verbal_name || "")}`}>
+                            {verbalLabel}
+                          </span>
+                        )}
+                        {!mathLabel && !verbalLabel && <span className="text-muted-foreground">—</span>}
+                      </div>
                     </td>
                     <td className="px-4 py-3 text-sm text-muted-foreground whitespace-nowrap">
                       {student.student_email}
@@ -195,7 +212,6 @@ export function OnboardingTable({
         </div>
       </Card>
 
-      {/* Dropdown rendered as fixed portal outside the table */}
       {openDropdown && currentStudent && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpenDropdown(null)} />
