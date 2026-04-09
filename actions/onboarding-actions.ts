@@ -74,6 +74,27 @@ function formatCourseSummary(
   return parts.join(" và ");
 }
 
+function formatCourseSummaryForEmailHtml(
+  student: Pick<StudentOnboarding, "course_math_name" | "math_code" | "course_verbal_name" | "verbal_code">
+): string {
+  const mathCourse = buildCourseLabel(student.course_math_name, student.math_code);
+  const verbalCourse = buildCourseLabel(student.course_verbal_name, student.verbal_code);
+
+  if (mathCourse && verbalCourse && mathCourse === verbalCourse) {
+    return mathCourse;
+  }
+
+  const parts: string[] = [];
+  if (mathCourse) {
+    parts.push(`${mathCourse} (Math)`);
+  }
+  if (verbalCourse) {
+    parts.push(`${verbalCourse} (Verbal)`);
+  }
+
+  return parts.join(" và<br />");
+}
+
 function validateRequiredInteger(
   value: number,
   fieldLabel: string,
@@ -152,7 +173,7 @@ async function loadFile(relativePath: string): Promise<Buffer> {
 }
 
 function renderOnboardingEmailTemplate(template: string, student: StudentOnboarding): string {
-  const courseSummary = formatCourseSummary(student);
+  const courseSummary = formatCourseSummaryForEmailHtml(student);
 
   return template
     .replace(/\[Tên học viên\]/g, student.student_name)
