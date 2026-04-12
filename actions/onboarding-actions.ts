@@ -288,7 +288,7 @@ export async function getDistinctSenders(): Promise<SenderInfo[]> {
        LEFT JOIN app_users au_by_email ON au_by_email.email     = so.sent_by
        LEFT JOIN app_users au_by_name  ON au_by_name.full_name  = so.sent_by
        WHERE so.sent_by IS NOT NULL
-       ORDER BY so.sent_by`
+       ORDER BY so.sent_by, (au_by_email.email IS NOT NULL) DESC`
     );
     return result.rows.map((r) => ({ sentBy: r.sent_by, email: r.email, full_name: r.full_name }));
   } catch (error) {
