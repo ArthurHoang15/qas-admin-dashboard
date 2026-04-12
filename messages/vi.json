@@ -503,6 +503,7 @@
     "viewDetails": "Xem chi tiết",
     "sentBy": "Gửi bởi",
     "sentByAll": "Người gửi - Tất cả",
+    "sentByHint": "Rê chuột vào tên để xem email và phân biệt người dùng trùng tên",
     "errorMessage": "Lỗi",
     "yes": "Có",
     "no": "Không",

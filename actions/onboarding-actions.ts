@@ -14,6 +14,7 @@ import type {
   CreateOnboardingInput,
   PaginationParams,
   PaginatedResult,
+  SenderInfo,
 } from "@/lib/types";
 
 let resendSalesClient: Resend | null = null;
@@ -276,12 +277,20 @@ export async function getOnboardingStats(): Promise<OnboardingStats> {
   }
 }
 
-export async function getDistinctSenders(): Promise<string[]> {
+export async function getDistinctSenders(): Promise<SenderInfo[]> {
   try {
-    const result = await query<{ sent_by: string }>(
-      `SELECT DISTINCT sent_by FROM student_onboarding WHERE sent_by IS NOT NULL ORDER BY sent_by`
+    const result = await query<{ sent_by: string; email: string; full_name: string | null }>(
+      `SELECT DISTINCT ON (so.sent_by)
+         so.sent_by,
+         COALESCE(au_by_email.email, au_by_name.email, so.sent_by) AS email,
+         COALESCE(au_by_email.full_name, au_by_name.full_name)     AS full_name
+       FROM student_onboarding so
+       LEFT JOIN app_users au_by_email ON au_by_email.email     = so.sent_by
+       LEFT JOIN app_users au_by_name  ON au_by_name.full_name  = so.sent_by
+       WHERE so.sent_by IS NOT NULL
+       ORDER BY so.sent_by`
     );
-    return result.rows.map((r) => r.sent_by);
+    return result.rows.map((r) => ({ sentBy: r.sent_by, email: r.email, full_name: r.full_name }));
   } catch (error) {
     console.error("Error fetching distinct senders:", error);
     return [];

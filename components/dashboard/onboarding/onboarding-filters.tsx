@@ -6,13 +6,13 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { getUserDisplayName } from "@/lib/user-display";
-import type { OnboardingFilters as Filters } from "@/lib/types";
+import type { OnboardingFilters as Filters, SenderInfo } from "@/lib/types";
 
 interface OnboardingFiltersProps {
   filters: Filters;
   onFiltersChange: (filters: Filters) => void;
   onClearFilters: () => void;
-  senders: string[];
+  senders: SenderInfo[];
 }
 
 export function OnboardingFilters({
@@ -32,7 +32,11 @@ export function OnboardingFilters({
 
   const senderOptions = [
     { value: "", label: t("sentByAll") },
-    ...senders.map((s) => ({ value: s, label: getUserDisplayName(s, null) })),
+    ...senders.map((s) => ({
+      value: s.sentBy,
+      label: getUserDisplayName(s.email, s.full_name),
+      title: s.email,
+    })),
   ];
 
   const hasActiveFilters = filters.search || filters.status || filters.sent_by;

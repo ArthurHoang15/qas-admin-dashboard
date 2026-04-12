@@ -32,6 +32,7 @@ import type {
   OnboardingFilters as Filters,
   OnboardingStats,
   PaginatedResult,
+  SenderInfo,
 } from "@/lib/types";
 
 const ITEMS_PER_PAGE = 10;
@@ -51,7 +52,7 @@ export function OnboardingContent() {
   const [filters, setFilters] = useState<Filters>({});
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
-  const [senders, setSenders] = useState<string[]>([]);
+  const [senders, setSenders] = useState<SenderInfo[]>([]);
   const [currentUserName, setCurrentUserName] = useState<string>("admin@example.com");
 
   // Selection state
@@ -383,6 +384,7 @@ export function OnboardingContent() {
         <>
           <OnboardingTable
             students={students.data}
+            senders={senders}
             selectedIds={selectedIds}
             onToggleSelect={handleToggleSelect}
             onToggleSelectAll={handleToggleSelectAll}
@@ -503,6 +505,7 @@ export function OnboardingContent() {
         isOpen={isDetailsModalOpen}
         onClose={() => { setIsDetailsModalOpen(false); setDetailsTarget(null); }}
         student={detailsTarget}
+        senderInfo={detailsTarget?.sent_by ? senders.find((s) => s.sentBy === detailsTarget.sent_by) : undefined}
       />
     </div>
   );

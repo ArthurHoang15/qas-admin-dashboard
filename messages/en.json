@@ -503,6 +503,7 @@
     "viewDetails": "View Details",
     "sentBy": "Sent By",
     "sentByAll": "Sent By - All",
+    "sentByHint": "Hover over a name to see the email and distinguish users with the same name",
     "errorMessage": "Error",
     "yes": "Yes",
     "no": "No",

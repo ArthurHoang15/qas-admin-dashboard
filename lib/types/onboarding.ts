@@ -42,6 +42,12 @@ export interface OnboardingStats {
   failed: number;
 }
 
+export interface SenderInfo {
+  sentBy: string;           // giá trị thực tế lưu trong cột sent_by (có thể là email hoặc tên)
+  email: string;            // email thực sự của user (resolved từ app_users)
+  full_name: string | null; // tên hiển thị
+}
+
 export interface CreateOnboardingInput {
   student_name: string;
   diagnostic_math_score: number;

@@ -1,13 +1,14 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { useTranslations } from "next-intl";
-import { MoreHorizontal, Eye, Download, Send, Trash2, Pencil, Info } from "lucide-react";
+import { MoreHorizontal, Eye, Download, Send, Trash2, Pencil, Info, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { getUserDisplayName } from "@/lib/user-display";
-import type { StudentOnboarding } from "@/lib/types";
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
+import type { StudentOnboarding, SenderInfo } from "@/lib/types";
 
 interface OnboardingTableProps {
   students: StudentOnboarding[];
@@ -20,6 +21,7 @@ interface OnboardingTableProps {
   onEdit: (student: StudentOnboarding) => void;
   onViewDetails: (student: StudentOnboarding) => void;
   onDelete: (student: StudentOnboarding) => void;
+  senders: SenderInfo[];
 }
 
 const STATUS_STYLES: Record<string, { variant: "warning" | "success" | "danger"; label: string }> = {
@@ -55,8 +57,13 @@ export function OnboardingTable({
   onEdit,
   onViewDetails,
   onDelete,
+  senders,
 }: OnboardingTableProps) {
   const t = useTranslations("onboarding");
+  const senderMap = useMemo(
+    () => new Map(senders.map((s) => [s.sentBy, s])),
+    [senders]
+  );
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [dropdownPos, setDropdownPos] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
   const buttonRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
@@ -101,7 +108,7 @@ export function OnboardingTable({
   const currentStudent = openDropdown ? students.find((s) => s.id === openDropdown) : null;
 
   return (
-    <>
+    <TooltipProvider>
       <Card className="overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -134,7 +141,17 @@ export function OnboardingTable({
                   {t("sentAt")}
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  {t("sentBy")}
+                  <div className="flex items-center gap-1">
+                    {t("sentBy")}
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <HelpCircle className="h-3 w-3 cursor-help" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        {t("sentByHint")}
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
                 </th>
                 <th className="px-4 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   {t("actions")}
@@ -146,6 +163,7 @@ export function OnboardingTable({
                 const statusInfo = STATUS_STYLES[student.status] || STATUS_STYLES.pending;
                 const mathLabel = formatCourseBadgeLabel(student.course_math_name, student.math_code);
                 const verbalLabel = formatCourseBadgeLabel(student.course_verbal_name, student.verbal_code);
+                const senderInfo = student.sent_by ? senderMap.get(student.sent_by) : undefined;
 
                 return (
                   <tr key={student.id} className="hover:bg-muted/30 transition-colors">
@@ -190,7 +208,21 @@ export function OnboardingTable({
                       {formatRelativeTime(student.sent_at)}
                     </td>
                     <td className="px-4 py-3 text-sm text-muted-foreground whitespace-nowrap">
-                      {student.sent_by ? getUserDisplayName(student.sent_by, null) : "—"}
+                      {student.sent_by ? (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="cursor-help underline decoration-dotted underline-offset-2">
+                              {getUserDisplayName(
+                                senderInfo?.email ?? student.sent_by,
+                                senderInfo?.full_name ?? null
+                              )}
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            {senderInfo?.email ?? student.sent_by}
+                          </TooltipContent>
+                        </Tooltip>
+                      ) : "—"}
                     </td>
                     <td className="px-4 py-3 text-sm text-right whitespace-nowrap">
                       <Button
@@ -270,6 +302,6 @@ export function OnboardingTable({
           </div>
         </>
       )}
-    </>
+    </TooltipProvider>
   );
 }
