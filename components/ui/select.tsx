@@ -6,6 +6,7 @@ import { ChevronDown } from "lucide-react";
 export interface SelectOption {
   value: string | number;
   label: string;
+  title?: string;
 }
 
 export interface SelectProps extends Omit<SelectHTMLAttributes<HTMLSelectElement>, "children"> {
@@ -40,7 +41,7 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
               <option value="">{placeholder}</option>
             )}
             {options.map((option) => (
-              <option key={option.value} value={option.value}>
+              <option key={option.value} value={option.value} title={option.title}>
                 {option.label}
               </option>
             ))}

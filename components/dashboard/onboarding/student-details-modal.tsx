@@ -4,12 +4,13 @@ import { useTranslations } from "next-intl";
 import { Modal } from "@/components/ui/modal";
 import { Badge } from "@/components/ui/badge";
 import { getUserDisplayName } from "@/lib/user-display";
-import type { StudentOnboarding } from "@/lib/types";
+import type { StudentOnboarding, SenderInfo } from "@/lib/types";
 
 interface StudentDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
   student: StudentOnboarding | null;
+  senderInfo?: SenderInfo;
 }
 
 const STATUS_VARIANT: Record<string, "warning" | "success" | "danger"> = {
@@ -18,7 +19,7 @@ const STATUS_VARIANT: Record<string, "warning" | "success" | "danger"> = {
   failed: "danger",
 };
 
-export function StudentDetailsModal({ isOpen, onClose, student }: StudentDetailsModalProps) {
+export function StudentDetailsModal({ isOpen, onClose, student, senderInfo }: StudentDetailsModalProps) {
   const t = useTranslations("onboarding");
 
   if (!student) return null;
@@ -81,7 +82,12 @@ export function StudentDetailsModal({ isOpen, onClose, student }: StudentDetails
             {student.sent_by && (
               <div className="flex gap-2 text-sm">
                 <span className="text-muted-foreground">{t("sentBy")}:</span>
-                <span className="font-medium">{getUserDisplayName(student.sent_by, null)}</span>
+                <span className="font-medium">
+                  {getUserDisplayName(
+                    senderInfo?.email ?? student.sent_by,
+                    senderInfo?.full_name ?? null
+                  )}
+                </span>
               </div>
             )}
             {student.error_message && (
